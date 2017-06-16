@@ -166,10 +166,6 @@ namespace BusterWood.Data
 
     public static class Extensions
     {
-        public static object Get(this Row row, string name, StringComparison comparison = StringComparison.OrdinalIgnoreCase) => row.Get(row.Schema.ColumnIndex(name, comparison));
-
-        public static T Get<T>(this Row row, string name, StringComparison comparison = StringComparison.OrdinalIgnoreCase) => (T)row.Get(name, comparison);
-
         public static Dictionary<string, object> ToDictionary(this Row row) => row.ToDictionary(cv => cv.Name, cv => cv.Value);
     }
 }
