@@ -109,10 +109,10 @@ namespace BusterWood.Data
         public abstract object Get(int index);
 
         /// <summary>Returns the value of a <see cref="Column"/> with the specified <paramref name="index"/></summary>
-        public virtual T Get<T>(int column)
+        public virtual T Get<T>(int index)
         {
-            var val = Get(column);
-            if (val == null && Schema[column].Type.IsValueType)
+            var val = Get(index);
+            if (val == null && Schema[index].Type.IsValueType)
                 return default(T);
             return (T)val;
         }
