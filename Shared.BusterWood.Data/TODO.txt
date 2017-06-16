@@ -2,18 +2,16 @@
 ====
 
 * Add method to create a schema from an existing schema with some additions?
-* Class to schema
-* IEnumerable<T> to DataSequence
 * Schema column order remapping - including DataSequence
 * Schema sub selection (less columns) - including DataSequence
 * LINQ on schemas?, i.e. order by dynamic column name?  Is this needed?
 * Row to object via CTOR
 * Row to object via properties (and fields)
-* Row ToDictionary
 * IDictionary to Row
 * Row to DbDataCommand parameter values
 * DataSequence to IEnumerable<SqlDataRecord>
 * DbDataReader to IEnumerable<DataSequence> for commands returning multiple result sets
+* Column storage for a list?  e.g. each column has a typed backing T[] of values
 * XmlDataSequence?
 * JsonDataSequence?
 * DataTable to DataSequence?
@@ -22,3 +20,9 @@
 * Schema to INSERT statement (keys?)
 * Schema to UPDATE statement (keys?)
 * Schema to MERGE statement (keys?)
+
+Done
+----
+* Class to schema
+* IEnumerable<T> to DataSequence
+* Row ToDictionary
