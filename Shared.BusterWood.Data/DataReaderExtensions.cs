@@ -16,10 +16,10 @@ namespace BusterWood.Data
         public static Schema ToSchema(this IDataReader reader, string name)
         {
             if (reader == null) throw new ArgumentNullException(nameof(reader));
-            return new Schema(name, reader.Columns());
+            return new Schema(name, Columns(reader));
         }
 
-        static IEnumerable<Column> Columns(this IDataReader reader)
+        static IEnumerable<Column> Columns(IDataReader reader)
         {
             return Enumerable.Range(0, reader.FieldCount).Select(i => new Column(reader.GetName(i), reader.GetFieldType(i)));
         }

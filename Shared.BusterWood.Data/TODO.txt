@@ -2,12 +2,18 @@
 ====
 
 * Add method to create a schema from an existing schema with some additions?
+* Column equality
+* Schema equality
+* Row equality
 * Schema column order remapping - including DataSequence
 * Schema sub selection (less columns) - including DataSequence
-* LINQ on schemas?, i.e. order by dynamic column name?  Is this needed?
 * Row to object via CTOR
 * Row to object via properties (and fields)
-* IDictionary to Row
+* IDictionary to Row (with known schema)
+* IDictionary to Row (with inferred schema)
+* Row to Dynamic
+* Dynamic to row (with known schema)
+* Dynamic to row (with inferred schema)
 * Row to DbDataCommand parameter values
 * DataSequence to IEnumerable<SqlDataRecord>
 * DbDataReader to IEnumerable<DataSequence> for commands returning multiple result sets
