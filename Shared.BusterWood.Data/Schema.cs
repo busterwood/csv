@@ -51,7 +51,7 @@ namespace BusterWood.Data
         IEnumerator IEnumerable.GetEnumerator() => columns.GetEnumerator();
     }
 
-    /// <remarks>This type is immuatable and cannot be changed (mutated)</remarks>
+    /// <remarks>This type is immutable and cannot be changed (mutated)</remarks>
     public struct Column
     {
         public Column(string name, Type type)
