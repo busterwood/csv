@@ -7,15 +7,29 @@ namespace BusterWood.Data
 {
     public static class CsvReaderExtensions
     {
-        public static string ToCsv(this Schema schema, char delimiter = ',') => string.Join(delimiter.ToString(), schema.Columns.Select(c => c.Name));
+        public static string ToCsv(this Schema schema, char delimiter = ',') => string.Join(delimiter.ToString(), schema.Select(c => c.Name));
 
         public static string ToCsv(this Row row, char delimiter = ',') => string.Join(delimiter.ToString(), row.Select(r => r.Value));
 
         public static DataSequence ToCsvDataSequence(this TextReader reader, string name, char delimiter = ',')
         {
-            if (reader == null) throw new ArgumentNullException(nameof(reader));
+            Schema schema = ToSchema(reader, name, delimiter);
+            return new CsvDataSequence(reader, schema, delimiter);
+        }
 
-            var headerLine = reader.ReadLine();
+        public static Schema ToSchema(this TextReader reader, string name, char delimiter)
+        {
+            if (reader == null) throw new ArgumentNullException(nameof(reader));
+            return ToSchema(reader.ReadLine(), name, delimiter);
+        }
+
+        static Schema ToSchema(string headerLine, string name, char delimiter)
+        {
+            return new Schema(name, ParseColumns(headerLine, delimiter));
+        }
+
+        static IEnumerable<Column> ParseColumns(string headerLine, char delimiter)
+        {
             if (headerLine == null)
                 throw new ArgumentException("Header line is missing");
 
@@ -24,8 +38,7 @@ namespace BusterWood.Data
                 throw new ArgumentException("Column name is missing from header line: " + headerLine);
 
             var cols = header.Select(h => new Column(h, typeof(string)));
-            var schema = new Schema(name, cols);
-            return new CsvDataSequence(reader, schema, delimiter);
+            return cols;
         }
 
         class CsvDataSequence : DataSequence
@@ -41,20 +54,29 @@ namespace BusterWood.Data
 
             public override IEnumerator<Row> GetEnumerator()
             {
-                var colcount = Schema.Columns.Count;
                 for(;;)
                 {
                     var line = reader.ReadLine();
                     if (string.IsNullOrEmpty(line))
                         yield break;
 
-                    var values = line.Split(delimiter);
-                    if (values.Length < Schema.Columns.Count)
-                        values = values.Concat(Enumerable.Repeat("", Schema.Columns.Count - values.Length)).ToArray(); // some missing data, report this via event?
-                    yield return new Row(Schema, values);
+                    string[] values = ParseLine(line);
+                    yield return new ArrayRow(Schema, values);
                 }
             }
-            
+
+            string[] ParseLine(string line)
+            {
+                var values = line.Split(delimiter);
+                if (values.Length < Schema.Count)
+                    values = PadLine(values);
+                return values;
+            }
+
+            private string[] PadLine(string[] values)
+            {
+                return values.Concat(Enumerable.Repeat("", Schema.Count - values.Length)).ToArray(); // some missing data, report this via event?
+            }
         }
     }
 }

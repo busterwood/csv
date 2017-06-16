@@ -6,7 +6,8 @@ using System.Linq;
 namespace BusterWood.Data
 {
     /// <summary>The metadata for a <see cref="DataSequence"/> of <see cref="Row"/></summary>
-    public struct Schema
+    /// <remarks>This type is immuatable and cannot be changed (mutated)</remarks>
+    public struct Schema : IReadOnlyList<Column>
     {
         readonly Column[] columns;
 
@@ -28,16 +29,15 @@ namespace BusterWood.Data
         /// <summary>The name of this schema</summary>
         public string Name { get; }
 
-        /// <summary>The columns </summary>
-        public IReadOnlyList<Column> Columns => columns;
+        public int Count => columns.Length;
 
-        /// <remarks>
-        /// looking up the index will be fine if number of columns in low (16 or less), no need for a dictionary
-        /// </remarks>
+        public Column this[int index] => columns[index];
+
+        /// <remarks>looking up the index will be fine if number of columns in low (16 or less), no need for a dictionary</remarks>
         public int ColumnIndex(string name, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
         {
             int i = 0;
-            foreach (var c in Columns)
+            foreach (var c in columns)
             {
                 if (string.Equals(c.Name, name, comparison))
                     return i;
@@ -45,8 +45,13 @@ namespace BusterWood.Data
             }
             return -1;
         }
+
+        public IEnumerator<Column> GetEnumerator() => ((IReadOnlyList<Column>)columns).GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => columns.GetEnumerator();
     }
 
+    /// <remarks>This type is immuatable and cannot be changed (mutated)</remarks>
     public struct Column
     {
         public Column(string name, Type type)
@@ -78,48 +83,73 @@ namespace BusterWood.Data
         /// <summary>The schema that applies to all rows in this sequence</summary>
         public Schema Schema { get; }
 
+        /// <summary>Returns a sequence of zero or more <see cref="Row"/></summary>
         public abstract IEnumerator<Row> GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
-    /// <summary>A row of data with a defined <see cref="Schema"/></summary>
-    public struct Row : IReadOnlyList<ColumnValue>
+    /// <summary>Base class for rows of data with a fixed <see cref="Schema"/></summary>
+    /// <remarks>This type is immuatable and cannot be changed (mutated)</remarks>
+    public abstract class Row : IReadOnlyList<ColumnValue>
     {
-        readonly object[] values;
+        public Schema Schema { get; }
 
-        public Row(Schema schema, object[] values)
+        protected Row(Schema schema)
         {
-            this.values = values;
             Schema = schema;
         }
 
-        public Schema Schema { get; }
+        int IReadOnlyCollection<ColumnValue>.Count => Schema.Count;
 
-        public object Get(int index) => values[index];
+        /// <summary>Returns the <see cref="ColumnValue"/> of this <see cref="Row"/> with the specified <paramref name="index"/></summary>
+        public virtual ColumnValue this[int index] => new ColumnValue(Schema[index], Get(index));
 
-        public T Get<T>(int column)
+        /// <summary>Returns the value of a <see cref="Column"/> with the specified <paramref name="index"/></summary>
+        public abstract object Get(int index);
+
+        /// <summary>Returns the value of a <see cref="Column"/> with the specified <paramref name="index"/></summary>
+        public virtual T Get<T>(int column)
         {
-            var val = values[column];
-            if (val == null && Schema.Columns[column].Type.IsValueType)
+            var val = Get(column);
+            if (val == null && Schema[column].Type.IsValueType)
                 return default(T);
             return (T)val;
         }
 
-        public ColumnValue this[int index] => new ColumnValue(Schema.Columns[index], values[index]);
+        /// <summary>Returns the value of a <see cref="Column"/> with the specified <paramref name="name"/></summary>
+        public virtual object Get(string name, StringComparison comparison = StringComparison.OrdinalIgnoreCase) => Get(Schema.ColumnIndex(name, comparison));
 
-        int IReadOnlyCollection<ColumnValue>.Count => Schema.Columns.Count;
+        /// <summary>Returns the value of a <see cref="Column"/> with the specified <paramref name="name"/></summary>
+        public virtual T Get<T>(string name, StringComparison comparison = StringComparison.OrdinalIgnoreCase) => (T)Get(name, comparison);
 
-        public IEnumerator<ColumnValue> GetEnumerator()
+        /// <summary>Returns a sequnce of values for each <see cref="Column"/> in the <see cref="Schema"/></summary>
+        public virtual IEnumerator<ColumnValue> GetEnumerator()
         {
             int i = 0;
-            foreach (var col in Schema.Columns)
-                yield return new ColumnValue(col, values[i++]);
+            foreach (var col in Schema)
+                yield return new ColumnValue(col, Get(i++));
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
+    /// <summary>A row of data with a defined <see cref="Schema"/></summary>
+    /// <remarks>This type is immuatable and cannot be changed (mutated)</remarks>
+    public class ArrayRow : Row 
+    {
+        readonly object[] values;
+
+        public ArrayRow(Schema schema, object[] values) : base(schema)
+        {
+            if (values == null) throw new ArgumentNullException(nameof(values));
+            this.values = values;
+        }
+
+        public override object Get(int index) => values[index];
+    }
+
+    /// <remarks>This type is immuatable and cannot be changed (mutated)</remarks>
     public struct ColumnValue
     {
         public ColumnValue(Column column, object value)
@@ -137,6 +167,9 @@ namespace BusterWood.Data
     public static class Extensions
     {
         public static object Get(this Row row, string name, StringComparison comparison = StringComparison.OrdinalIgnoreCase) => row.Get(row.Schema.ColumnIndex(name, comparison));
+
         public static T Get<T>(this Row row, string name, StringComparison comparison = StringComparison.OrdinalIgnoreCase) => (T)row.Get(name, comparison);
+
+        public static Dictionary<string, object> ToDictionary(this Row row) => row.ToDictionary(cv => cv.Name, cv => cv.Value);
     }
 }

@@ -10,11 +10,19 @@ namespace BusterWood.Data
     {
         public static DataSequence ToDataSequence(this IDataReader reader, string name)
         {
-            if (reader == null) throw new ArgumentNullException(nameof(reader));
-
-            var cols = Enumerable.Range(0, reader.FieldCount).Select(i => new Column(reader.GetName(i), reader.GetFieldType(i)));
-            var schema = new Schema(name, cols);
+            Schema schema = ToSchema(reader, name);
             return new DbDataSequence(reader, schema);
+        }
+
+        public static Schema ToSchema(this IDataReader reader, string name)
+        {
+            if (reader == null) throw new ArgumentNullException(nameof(reader));
+            return new Schema(name, reader.Columns());
+        }
+
+        static IEnumerable<Column> Columns(this IDataReader reader)
+        {
+            return Enumerable.Range(0, reader.FieldCount).Select(i => new Column(reader.GetName(i), reader.GetFieldType(i)));
         }
 
         class DbDataSequence : DataSequence
@@ -28,15 +36,13 @@ namespace BusterWood.Data
 
             public override IEnumerator<Row> GetEnumerator()
             {
-                var colcount = Schema.Columns.Count;
                 while (reader.Read())
                 {
-                    var values = new object[colcount];
+                    var values = new object[Schema.Count];
                     reader.GetValues(values);
-                    yield return new Row(Schema, values);
+                    yield return new ArrayRow(Schema, values);
                 }
             }
-
         }        
     }
 }
