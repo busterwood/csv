@@ -32,13 +32,10 @@ namespace BusterWood.Data
         {
             if (headerLine == null)
                 throw new ArgumentException("Header line is missing");
-
             var header = headerLine.Split(delimiter);
             if (header.Any(string.IsNullOrWhiteSpace))
                 throw new ArgumentException("Column name is missing from header line: " + headerLine);
-
-            var cols = header.Select(h => new Column(h, typeof(string)));
-            return cols;
+            return header.Select(h => new Column(h, typeof(string)));
         }
 
         class CsvDataSequence : DataSequence
@@ -68,9 +65,7 @@ namespace BusterWood.Data
             string[] ParseLine(string line)
             {
                 var values = line.Split(delimiter);
-                if (values.Length < Schema.Count)
-                    values = PadLine(values);
-                return values;
+                return values.Length == Schema.Count ? values : PadLine(values);
             }
 
             private string[] PadLine(string[] values)
