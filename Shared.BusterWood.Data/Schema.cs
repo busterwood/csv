@@ -7,7 +7,7 @@ namespace BusterWood.Data
 {
     /// <summary>The metadata for a <see cref="DataSequence"/> of <see cref="Row"/></summary>
     /// <remarks>This type is immuatable and cannot be changed (mutated)</remarks>
-    public struct Schema : IReadOnlyList<Column>
+    public struct Schema : IReadOnlyList<Column> //TODO: class?  would this avoid frequent boxing?
     {
         readonly Column[] columns;
 
@@ -109,10 +109,11 @@ namespace BusterWood.Data
         public abstract object Get(int index);
 
         /// <summary>Returns the value of a <see cref="Column"/> with the specified <paramref name="index"/></summary>
-        public virtual T Get<T>(int index)
+        public virtual T Get<T>(int index) => ValueOrDefault<T>(Get(index));
+
+        protected static T ValueOrDefault<T>(object val)
         {
-            var val = Get(index);
-            if (val == null && Schema[index].Type.IsValueType)
+            if (val == null && typeof(T).IsValueType)
                 return default(T);
             return (T)val;
         }
@@ -121,7 +122,7 @@ namespace BusterWood.Data
         public virtual object Get(string name, StringComparison comparison = StringComparison.OrdinalIgnoreCase) => Get(Schema.ColumnIndex(name, comparison));
 
         /// <summary>Returns the value of a <see cref="Column"/> with the specified <paramref name="name"/></summary>
-        public virtual T Get<T>(string name, StringComparison comparison = StringComparison.OrdinalIgnoreCase) => (T)Get(name, comparison);
+        public virtual T Get<T>(string name, StringComparison comparison = StringComparison.OrdinalIgnoreCase) => ValueOrDefault<T>(Get(name, comparison));
 
         /// <summary>Returns a sequnce of values for each <see cref="Column"/> in the <see cref="Schema"/></summary>
         public virtual IEnumerator<ColumnValue> GetEnumerator()
@@ -143,6 +144,7 @@ namespace BusterWood.Data
         public ArrayRow(Schema schema, object[] values) : base(schema)
         {
             if (values == null) throw new ArgumentNullException(nameof(values));
+            if (values.Length != schema.Count) throw new ArgumentException("number of values does not match number of columns", nameof(values));
             this.values = values;
         }
 
