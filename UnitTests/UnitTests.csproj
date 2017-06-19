@@ -44,7 +44,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ColumnEquality.cs" />
+    <Compile Include="ColumnValueEquality.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RowEqualtity.cs" />
     <Compile Include="SchemaEquality.cs" />
     <Compile Include="SchemaTests.cs" />
   </ItemGroup>

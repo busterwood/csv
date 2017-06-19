@@ -59,6 +59,9 @@ namespace BusterWood.Data
         public override bool Equals(object obj) => obj is Schema && Equals((Schema)obj);
         public override int GetHashCode() => columns?.Sum(c => c.GetHashCode()) ?? 0;
 
+        public static bool operator ==(Schema left, Schema right) => left.Equals(right);
+        public static bool operator !=(Schema left, Schema right) => !left.Equals(right);
+
         /// <summary>Does the <paramref name="left"/> schema has the same set of columns as the <param name="right"/> schema? (column order does not matter)</summary>
         public static bool SetEquals(Schema left, Schema right) => left.All(l => right.Contains(l));
 
@@ -86,6 +89,9 @@ namespace BusterWood.Data
         public override bool Equals(object obj) => obj is Column && Equals((Column)obj);
         public override int GetHashCode() => Name?.GetHashCode() + Type?.GetHashCode() ?? 0;
         public override string ToString() => Name;
+
+        public static bool operator ==(Column left, Column right) => left.Equals(right);
+        public static bool operator !=(Column left, Column right) => !left.Equals(right);
     }
 
 

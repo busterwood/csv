@@ -26,7 +26,7 @@ namespace BusterWood.Data
 
     /// <summary>Base class for rows of data with a fixed <see cref="Schema"/></summary>
     /// <remarks>This type is immuatable and cannot be changed (mutated)</remarks>
-    public abstract class Row : IReadOnlyList<ColumnValue>, ISchemaed
+    public abstract class Row : IReadOnlyList<ColumnValue>, ISchemaed, IEquatable<Row>
     {
         public Schema Schema { get; }
 
@@ -63,6 +63,13 @@ namespace BusterWood.Data
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public bool Equals(Row other) => Schema == other?.Schema && Enumerable.SequenceEqual(this, other);
+        public override bool Equals(object obj) => Equals(obj as Row);
+        public override int GetHashCode() => this.Aggregate(0, (hash, cv) => { unchecked { return hash + cv.GetHashCode(); } });
+
+        public static bool operator ==(Row left, Row right) => Equals(left, right);
+        public static bool operator !=(Row left, Row right) => !Equals(left, right);
     }
 
     /// <summary>A row of data with a defined <see cref="Schema"/></summary>
@@ -71,7 +78,7 @@ namespace BusterWood.Data
     {
         readonly object[] values;
 
-        public ArrayRow(Schema schema, object[] values) : base(schema)
+        public ArrayRow(Schema schema, params object[] values) : base(schema)
         {
             if (values == null) throw new ArgumentNullException(nameof(values));
             if (values.Length != schema.Count) throw new ArgumentException("number of values does not match number of columns", nameof(values));
@@ -82,7 +89,7 @@ namespace BusterWood.Data
     }
 
     /// <remarks>This type is immuatable and cannot be changed (mutated)</remarks>
-    public struct ColumnValue
+    public struct ColumnValue : IEquatable<ColumnValue>
     {
         public ColumnValue(Column column, object value)
         {
@@ -94,11 +101,18 @@ namespace BusterWood.Data
         public object Value { get; }
         public string Name => Column.Name;
         public override string ToString() => $"{Name} = {Value}";
+
+        public bool Equals(ColumnValue other) => Column == other.Column && Equals(Value, other.Value);
+        public override bool Equals(object obj) => obj is ColumnValue && Equals((ColumnValue)obj);
+        public override int GetHashCode() => Column.GetHashCode() + Value?.GetHashCode() ?? 0;
+
+        public static bool operator ==(ColumnValue left, ColumnValue right) => left.Equals(right);
+        public static bool operator !=(ColumnValue left, ColumnValue right) => !left.Equals(right);
     }
 
     public static partial class Extensions
     {
-        public static Dictionary<string, object> ToDictionary(this Row row) => row.ToDictionary(cv => cv.Name, cv => cv.Value);
+        public static Dictionary<string, object> ToDictionary(this Row row) => row.ToDictionary(cv => cv.Name, cv => cv.Value);        
     }
 
 }
