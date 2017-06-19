@@ -12,9 +12,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{5F85669A-2CF2-4819-980A-03FA84062CBD}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Shared.BusterWood.Data\Shared.Records.projitems*{31fbef30-81a5-4fc5-9e4c-c03a9f9d09d1}*SharedItemsImports = 4
+		Shared.BusterWood.Data\Shared.Records.projitems*{5f85669a-2cf2-4819-980a-03fa84062cbd}*SharedItemsImports = 4
 		Shared.BusterWood.Data\Shared.Records.projitems*{bb9663e8-1a83-4093-9a17-65626d0240bb}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,6 +29,10 @@ Global
 		{31FBEF30-81A5-4FC5-9E4C-C03A9F9D09D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31FBEF30-81A5-4FC5-9E4C-C03A9F9D09D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31FBEF30-81A5-4FC5-9E4C-C03A9F9D09D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F85669A-2CF2-4819-980A-03FA84062CBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F85669A-2CF2-4819-980A-03FA84062CBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F85669A-2CF2-4819-980A-03FA84062CBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F85669A-2CF2-4819-980A-03FA84062CBD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -2,8 +2,7 @@
 ====
 
 * Add method to create a schema from an existing schema with some additions?
-* Column equality
-* Schema equality
+* Merge two Data Sequences
 * Row equality
 * Schema column order remapping - including DataSequence
 * Schema sub selection (less columns) - including DataSequence
@@ -32,3 +31,6 @@ Done
 * Class to schema
 * IEnumerable<T> to DataSequence
 * Row ToDictionary
+* Column equality
+* Schema equality
+* Merge two schemas

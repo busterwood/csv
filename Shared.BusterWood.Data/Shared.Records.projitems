@@ -12,6 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ClassExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CsvReaderExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataReaderExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataSequence.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Schema.cs" />
   </ItemGroup>
   <ItemGroup>
