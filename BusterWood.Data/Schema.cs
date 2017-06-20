@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace BusterWood.Data
@@ -12,47 +13,60 @@ namespace BusterWood.Data
 
     /// <summary>The metadata for a <see cref="DataSequence"/> of <see cref="Row"/></summary>
     /// <remarks>This type is immuatable and cannot be changed (mutated)</remarks>
-    public struct Schema : IReadOnlyList<Column>, IEquatable<Schema>
+    public struct Schema : IReadOnlyCollection<Column>, IEquatable<Schema>
     {
-        readonly Column[] columns;
+        internal readonly ImmutableDictionary<string, Column> columns;
 
-        public Schema(string name, IEnumerable<Column> columns) 
-            : this(name, columns?.ToArray())   // take a copy and convert to array (array is the lightest type and fasted to iterate)            
-        { }
-
-        public Schema(string name, params Column[] columns)
+        public Schema(string name, ImmutableDictionary<string, Column> columns)
         {
             if (columns == null)
                 throw new ArgumentNullException(nameof(columns));
-            if (columns.Length == 0)
-                throw new ArgumentException("Schema must have one or more columns");
-            CheckColumnsAreUnqiue(columns);
+            if (columns.Count == 0)
+                throw new ArgumentException($"Schema '{name}' must have one or more columns");
 
             Name = name;
             this.columns = columns;
+
         }
 
-        static void CheckColumnsAreUnqiue(Column[] columns)
+        public Schema(string name, IEnumerable<Column> columns) 
         {
-            var unique = new HashSet<Column>();
+            Name = name;
+            var temp = ImmutableDictionary<string, Column>.Empty.ToBuilder();
+            temp.KeyComparer = StringComparer.OrdinalIgnoreCase;
             foreach (var c in columns)
             {
-                if (!unique.Add(c))
+                if (temp.ContainsKey(c.Name))
                     throw new ArgumentException($"Schema must have unqiue columns: {c} is duplicated");
+                temp.Add(c.Name, c);
             }
+            if (temp.Count == 0)
+                throw new ArgumentException($"Schema '{name}' must have one or more columns");
+            this.columns = temp.ToImmutable();
+        }
+
+        public Schema(string name, params Column[] columns)
+            : this(name, (IEnumerable<Column>)columns)
+        {
         }
 
         /// <summary>The name of this schema (optional)</summary>
         public string Name { get; }
 
-        public int Count => columns?.Length ?? 0;
+        public int Count => columns?.Count ?? 0;
 
-        public Column this[int index] => columns[index];
+        public Column this[string name]
+        {
+            get
+            {
+                Column col;
+                if (!columns.TryGetValue(name, out col))
+                    throw new UnknownColumnException($"Cannot find column '{name}' in schema '{Name}'");
+                return col;
+            }
+        }
 
-        /// <remarks>looking up the index will be fine if number of columns in low (16 or less), no need for a dictionary</remarks>
-        public int ColumnIndex(string name) => columns.IndexOf(c => string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase));
-
-        public IEnumerator<Column> GetEnumerator() => ((IEnumerable<Column>)columns).GetEnumerator();
+        public IEnumerator<Column> GetEnumerator() => columns.Values.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => columns.GetEnumerator();
 
         public bool Equals(Schema other) => Count == other.Count && Enumerable.SequenceEqual(columns, other.columns);
@@ -62,10 +76,14 @@ namespace BusterWood.Data
         public static bool operator ==(Schema left, Schema right) => left.Equals(right);
         public static bool operator !=(Schema left, Schema right) => !left.Equals(right);
 
-        /// <summary>Does the <paramref name="left"/> schema has the same set of columns as the <param name="right"/> schema? (column order does not matter)</summary>
-        public static bool SetEquals(Schema left, Schema right) => left.All(l => right.Contains(l));
+        public static Schema Merge(Schema left, Schema right) => 
+            new Schema($"Merge of {left.Name} and {right.Name}", left.columns.AddRange(right.Where(r => !left.columns.ContainsKey(r.Name)).Select(c => new KeyValuePair<string, Column>(c.Name, c))));
 
-        public static Schema Merge(Schema left, Schema right) => new Schema($"Merge of {left.Name} and {right.Name}", left.Concat(right.Where(r => !left.Contains(r))));
+        internal void ThrowWhenUnknownColumn(string name)
+        {
+            if (columns?.ContainsKey(name) != true)
+                throw new UnknownColumnException($"Unkown column {name} in schema '{Name}'");
+        }
     }
 
     /// <remarks>This type is immutable and cannot be changed (mutated)</remarks>
@@ -94,19 +112,8 @@ namespace BusterWood.Data
         public static bool operator !=(Column left, Column right) => !left.Equals(right);
     }
 
-
     public static partial class Extensions
     {
-        public static int IndexOf<T>(this T[] items, Func<T, bool> predicate)
-        {
-            int i = 0;
-            foreach (var item in items)
-            {
-                if (predicate(item))
-                    return i;
-                i++;
-            }
-            return -1;
-        }
+        public static ColumnValue Value(this Column column, object val) => new ColumnValue(column, val);
     }
 }

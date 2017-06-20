@@ -8,14 +8,4 @@
   <PropertyGroup Label="Configuration">
     <Import_RootNamespace>Shared.Records</Import_RootNamespace>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)ClassExtensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)CsvReaderExtensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)DataReaderExtensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)DataSequence.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Schema.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="$(MSBuildThisFileDirectory)TODO.txt" />
-  </ItemGroup>
 </Project>

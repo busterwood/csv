@@ -9,8 +9,10 @@ namespace BusterWood.Data
     {
         public static DataSequence ToDataSequence(this IDataReader reader, string name)
         {
-            Schema schema = ToSchema(reader, name);
-            return new DbDataSequence(reader, schema);
+            if (reader == null) throw new ArgumentNullException(nameof(reader));
+            var cols = Columns(reader).ToArray();
+            Schema schema = new Schema(name, cols);
+            return new DbDataSequence(reader, cols, schema);
         }
 
         public static Schema ToSchema(this IDataReader reader, string name)
@@ -27,9 +29,11 @@ namespace BusterWood.Data
         class DbDataSequence : DataSequence
         {
             readonly IDataReader reader;
+            readonly Column[] columns;
 
-            public DbDataSequence(IDataReader reader, Schema schema) : base(schema)
+            public DbDataSequence(IDataReader reader, Column[] columns, Schema schema) : base(schema)
             {
+                this.columns = columns;
                 this.reader = reader;
             }
 
@@ -39,9 +43,10 @@ namespace BusterWood.Data
                 {
                     var values = new object[Schema.Count];
                     reader.GetValues(values);
-                    yield return new ArrayRow(Schema, values);
+                    yield return new OrderedArrayRow(Schema, columns, values);
                 }
             }
-        }        
+        }
+
     }
 }

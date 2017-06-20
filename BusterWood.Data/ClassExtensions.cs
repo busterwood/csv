@@ -28,7 +28,7 @@ namespace BusterWood.Data
             return new Schema(name ?? type.Name, cols);
         }
 
-        static MemberInfo[] ReadableMembers(Type type) =>
+        internal static MemberInfo[] ReadableMembers(Type type) =>
             type.GetProperties().Where(p => p.CanRead)
             .Concat<MemberInfo>(type.GetFields())
             .ToArray();
@@ -38,57 +38,52 @@ namespace BusterWood.Data
         class ObjectSequence<T> : DataSequence
         {
             readonly IEnumerable<T> items;
-            readonly MemberInfo[] members;
 
             public ObjectSequence(Schema schema, IEnumerable<T> items) : base(schema)
             {
                 if (items == null) throw new ArgumentNullException(nameof(items));
                 this.items = items;
-                members = ReadableMembers(typeof(T));
             }
 
             public override IEnumerator<Row> GetEnumerator()
             {
                 foreach (var item in items)
-                    yield return new ReflectionRow(Schema, members, item);
+                    yield return new ReflectionRow<T>(Schema, item);
             }
         }
 
         class SingleObjectSequence<T> : DataSequence
         {
             readonly T item;
-            readonly MemberInfo[] members;
 
             public SingleObjectSequence(Schema schema, T item) : base(schema)
             {
                 if (item == null) throw new ArgumentNullException(nameof(item));
                 this.item = item;
-                members = ReadableMembers(typeof(T));
             }
 
             public override IEnumerator<Row> GetEnumerator()
             {
-                if ((typeof(T).IsClass || IsNullableValueType()) && item == null)
-                    yield return new ReflectionRow(Schema, members, item);
+                if ((typeof(T).IsClass || IsNullableValueType()) && item != null)
+                    yield return new ReflectionRow<T>(Schema, item);
             }
 
             private static bool IsNullableValueType() => typeof(T).IsValueType && typeof(T).IsConstructedGenericType && typeof(T).GetGenericTypeDefinition() == typeof(Nullable<>);
         }
 
-        class ReflectionRow : Row
+        class ReflectionRow<T> : Row
         {
-            readonly MemberInfo[] members;
+            static readonly Dictionary<string, MemberInfo> membersByName = ReadableMembers(typeof(T)).ToDictionary(m => m.Name, StringComparer.OrdinalIgnoreCase);
             readonly object item;
 
-            public ReflectionRow(Schema schema, MemberInfo[] members, object item) : base(schema)
+            public ReflectionRow(Schema schema, object item) : base(schema)
             {
-                this.members = members;
                 this.item = item;
             }
 
-            public override object Get(int index) => GetValue(members[index], item);
+            public override object Get(string name) => GetValue(membersByName[name]);
 
-            static object GetValue(MemberInfo m, object item) => m is PropertyInfo ? ((PropertyInfo)m).GetValue(item) : ((FieldInfo)m).GetValue(item);
+            object GetValue(MemberInfo m) => m is PropertyInfo ? ((PropertyInfo)m).GetValue(item) : ((FieldInfo)m).GetValue(item);
         }
 
     }

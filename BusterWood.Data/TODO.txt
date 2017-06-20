@@ -3,7 +3,9 @@
 
 * Add method to create a schema from an existing schema with some additions?
 * Merge two Data Sequences
-* Row equality
+* Add a calculated column to a sequence
+* Remove columns from a sequence 
+* join two sequences (need to define keys?)
 * Schema column order remapping - including DataSequence
 * Schema sub selection (less columns) - including DataSequence
 * Row to object via CTOR
@@ -34,3 +36,4 @@ Done
 * Column equality
 * Schema equality
 * Merge two schemas
+* Row equality

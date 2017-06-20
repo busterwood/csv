@@ -35,6 +35,10 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Collections.Immutable, Version=1.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Collections.Immutable.1.3.1\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Core" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -45,6 +49,7 @@
   <ItemGroup>
     <Compile Include="ColumnEquality.cs" />
     <Compile Include="ColumnValueEquality.cs" />
+    <Compile Include="ExtensionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RowEqualtity.cs" />
     <Compile Include="SchemaEquality.cs" />
@@ -53,7 +58,12 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <Import Project="..\Shared.BusterWood.Data\Shared.Records.projitems" Label="Shared" />
+  <ItemGroup>
+    <ProjectReference Include="..\BusterWood.Data\BusterWood.Data.csproj">
+      <Project>{31fbef30-81a5-4fc5-9e4c-c03a9f9d09d1}</Project>
+      <Name>BusterWood.Data</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

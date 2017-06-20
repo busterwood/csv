@@ -13,8 +13,8 @@ namespace BusterWood.Data
 
         public static DataSequence ToCsvDataSequence(this TextReader reader, string name, char delimiter = ',')
         {
-            Schema schema = ToSchema(reader, name, delimiter);
-            return new CsvDataSequence(reader, schema, delimiter);
+            var orderedColumns = ParseColumns(reader, delimiter).ToArray();
+            return new CsvDataSequence(reader, orderedColumns, name, delimiter);
         }
 
         public static Schema ToSchema(this TextReader reader, string name, char delimiter)
@@ -23,10 +23,9 @@ namespace BusterWood.Data
             return ToSchema(reader.ReadLine(), name, delimiter);
         }
 
-        static Schema ToSchema(string headerLine, string name, char delimiter)
-        {
-            return new Schema(name, ParseColumns(headerLine, delimiter));
-        }
+        static Schema ToSchema(string headerLine, string name, char delimiter) => new Schema(name, ParseColumns(headerLine, delimiter));
+
+        static IEnumerable<Column> ParseColumns(TextReader reader, char delimiter) => ParseColumns(reader.ReadLine(), delimiter);
 
         static IEnumerable<Column> ParseColumns(string headerLine, char delimiter)
         {
@@ -42,9 +41,11 @@ namespace BusterWood.Data
         {
             readonly TextReader reader;
             readonly char delimiter;
+            readonly Column[] columns;
 
-            public CsvDataSequence(TextReader reader, Schema schema, char delimiter) : base(schema)
+            public CsvDataSequence(TextReader reader, Column[] columns, string schemaName, char delimiter) : base(new Schema(schemaName, columns))
             {
+                this.columns = columns;
                 this.reader = reader;
                 this.delimiter = delimiter;
             }
@@ -58,7 +59,7 @@ namespace BusterWood.Data
                         yield break;
 
                     string[] values = ParseLine(line);
-                    yield return new ArrayRow(Schema, values);
+                    yield return new OrderedArrayRow(Schema, columns, values);
                 }
             }
 
@@ -73,5 +74,7 @@ namespace BusterWood.Data
                 return values.Concat(Enumerable.Repeat("", Schema.Count - values.Length)).ToArray(); // some missing data, report this via event?
             }
         }
+
+
     }
 }
