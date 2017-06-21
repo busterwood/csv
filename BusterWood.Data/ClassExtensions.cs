@@ -108,6 +108,7 @@ namespace BusterWood.Data
             }
 
             public override object Get(string name) => funcsByName[name](item);
+
         }
 
     }

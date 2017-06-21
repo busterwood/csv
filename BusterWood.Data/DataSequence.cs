@@ -81,7 +81,19 @@ namespace BusterWood.Data
         public bool Equals(Row other) => Schema == other.Schema && this.All(l => other.Contains(l));
         public override bool Equals(object obj) => Equals(obj as Row);
 
-        public override int GetHashCode() => this.Aggregate(0, (hash, cv) => { unchecked { return hash + cv.GetHashCode(); } });
+        public override int GetHashCode()
+        {
+            // optimized code - use the schema's hash code + the hash code of all values
+            // which is faster that summing all the ColumnValue's hash codes 
+            // as it avoid calculating hash codes for each Column
+            unchecked
+            {
+                var hc = Schema.GetHashCode(); // get the cached shashcode from the schema, 
+                foreach (var col in Schema)
+                    hc += Get(col.Name)?.GetHashCode() ?? 0; // add on all the values
+                return hc;
+            }
+        }
 
         public static bool operator ==(Row left, Row right) => Equals(left, right);
         public static bool operator !=(Row left, Row right) => !Equals(left, right);
@@ -105,6 +117,17 @@ namespace BusterWood.Data
             Schema.ThrowWhenUnknownColumn(name);  // allow column restriction without copying rows
             var idx = values.IndexOf(col => string.Equals(col.Name, name, StringComparison.OrdinalIgnoreCase));
             return values[idx];
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hc = 0;
+                foreach (var cv in this)
+                    hc += cv.GetHashCode();
+                return hc;
+            }
         }
     }
 
@@ -177,7 +200,7 @@ namespace BusterWood.Data
 
         public bool Equals(ColumnValue other) => Column == other.Column && Equals(Value, other.Value);
         public override bool Equals(object obj) => obj is ColumnValue && Equals((ColumnValue)obj);
-        public override int GetHashCode() => Column.GetHashCode() + Value?.GetHashCode() ?? 0;
+        public override int GetHashCode() => Column.GetHashCode() + (Value?.GetHashCode() ?? 0);
 
         public static bool operator ==(ColumnValue left, ColumnValue right) => left.Equals(right);
         public static bool operator !=(ColumnValue left, ColumnValue right) => !left.Equals(right);
