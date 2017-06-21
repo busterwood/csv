@@ -50,7 +50,8 @@ namespace BusterWood.Data
                 this.delimiter = delimiter;
             }
 
-            public override IEnumerator<Row> GetEnumerator()
+
+            protected override IEnumerable<Row> GetSequence()
             {
                 for(;;)
                 {

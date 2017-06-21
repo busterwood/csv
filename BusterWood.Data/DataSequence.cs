@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace BusterWood.Data
 {
-    /// <summary>A sequenece of rows which all have the same <see cref="Schema"/></summary>
+    /// <summary>A sequenece of UNIQUE rows which all have the same <see cref="Schema"/></summary>
     /// <remarks>See <see cref="CsvReaderExtensions.ToCsvDataSequence(System.IO.TextReader, string, char)"/> and <see cref="DataReaderExtensions.ToDataSequence(System.Data.IDataReader, string)"/></remarks>
     public abstract class DataSequence : IEnumerable<Row>, ISchemaed
     {
@@ -18,7 +19,9 @@ namespace BusterWood.Data
         public Schema Schema { get; }
 
         /// <summary>Returns a sequence of zero or more <see cref="Row"/></summary>
-        public abstract IEnumerator<Row> GetEnumerator();
+        protected abstract IEnumerable<Row> GetSequence();
+
+        public IEnumerator<Row> GetEnumerator() => GetSequence().Distinct().GetEnumerator(); // all rows must be unique
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
@@ -33,7 +36,7 @@ namespace BusterWood.Data
             this.rows = rows;
         }
 
-        public override IEnumerator<Row> GetEnumerator() => rows.GetEnumerator();
+        protected override IEnumerable<Row> GetSequence() => rows;
     }
 
     /// <summary>Base class for rows of data with a fixed <see cref="Schema"/></summary>
@@ -68,6 +71,7 @@ namespace BusterWood.Data
         public double Double(string name) => ValueOrDefault<double>(Get(name));
         public decimal Decimal(string name) => ValueOrDefault<decimal>(Get(name));
         public bool Bool(string name) => ValueOrDefault<bool>(Get(name));
+        public DateTime DateTime(string name) => ValueOrDefault<DateTime>(Get(name));
 
         /// <summary>Returns a sequnce of values for each <see cref="Column"/> in the <see cref="Schema"/></summary>
         public virtual IEnumerator<ColumnValue> GetEnumerator() => Schema.Select(col => new ColumnValue(col, Get(col.Name))).GetEnumerator();
@@ -135,22 +139,22 @@ namespace BusterWood.Data
     /// <remarks>This type is immuatable and cannot be changed (mutated)</remarks>
     public class MapRow : Row
     {
-        readonly IReadOnlyDictionary<string, object> values;
+        internal readonly ImmutableDictionary<string, object> values;
 
         public MapRow(Schema schema, params ColumnValue[] values) : base(schema)
         {
             if (values == null) throw new ArgumentNullException(nameof(values));
             if (values.Length != schema.Count) throw new ArgumentException("number of values does not match number of columns", nameof(values));
-            this.values = values.ToDictionary(cv => cv.Name, cv => cv.Value, StringComparer.OrdinalIgnoreCase);
+            this.values = values.ToImmutableDictionary(cv => cv.Name, cv => cv.Value, StringComparer.OrdinalIgnoreCase);
         }
 
-        public MapRow(Schema schema, IReadOnlyDictionary<string, object> values) : base(schema)
+        public MapRow(Schema schema, ImmutableDictionary<string, object> values) : base(schema)
         {
             if (values == null) throw new ArgumentNullException(nameof(values));
-            //if (values.Count != schema.Count) throw new ArgumentException("number of values does not match number of columns", nameof(values));
+            if (values.Count != schema.Count) throw new ArgumentException("number of values does not match number of columns", nameof(values));
             this.values = values;
         }
-
+        
         public override object Get(string name)
         {
             Schema.ThrowWhenUnknownColumn(name); // allow column restriction without copying rows

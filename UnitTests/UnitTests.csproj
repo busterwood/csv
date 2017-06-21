@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClassExtensionTests.cs" />
     <Compile Include="ColumnEquality.cs" />
     <Compile Include="ColumnValueEquality.cs" />
     <Compile Include="ExtensionTests.cs" />

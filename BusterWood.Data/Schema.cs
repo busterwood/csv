@@ -33,7 +33,7 @@ namespace BusterWood.Data
         {
             Name = name;
             var temp = ImmutableDictionary<string, Column>.Empty.ToBuilder();
-            temp.KeyComparer = StringComparer.OrdinalIgnoreCase;
+            temp.KeyComparer = Column.NameEquality;
             foreach (var c in columns)
             {
                 if (temp.ContainsKey(c.Name))
@@ -89,6 +89,8 @@ namespace BusterWood.Data
     /// <remarks>This type is immutable and cannot be changed (mutated)</remarks>
     public struct Column : IEquatable<Column>
     {
+        internal static readonly IEqualityComparer<string> NameEquality = StringComparer.OrdinalIgnoreCase;
+
         public Column(string name, Type type)
         {
             if (name == null) throw new ArgumentNullException(nameof(name));
@@ -103,7 +105,8 @@ namespace BusterWood.Data
         /// <summary>the <see cref="System.Type"/> of this column</summary>
         public Type Type { get; }
 
-        public bool Equals(Column other) => string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) && Type == other.Type;
+        public bool NameEquals(string name) => NameEquality.Equals(Name, name);
+        public bool Equals(Column other) => NameEquals(other.Name) && Type == other.Type;
         public override bool Equals(object obj) => obj is Column && Equals((Column)obj);
         public override int GetHashCode() => Name?.GetHashCode() + Type?.GetHashCode() ?? 0;
         public override string ToString() => Name;
