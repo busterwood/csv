@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 
 namespace BusterWood.Data
@@ -15,9 +14,10 @@ namespace BusterWood.Data
     /// <remarks>This type is immuatable and cannot be changed (mutated)</remarks>
     public struct Schema : IReadOnlyCollection<Column>, IEquatable<Schema>
     {
-        internal readonly ImmutableDictionary<string, Column> columns;
+        internal readonly IDictionary<string, Column> columns;
+        readonly int hashCode;
 
-        public Schema(string name, ImmutableDictionary<string, Column> columns)
+        internal Schema(string name, IDictionary<string, Column> columns)
         {
             if (columns == null)
                 throw new ArgumentNullException(nameof(columns));
@@ -26,14 +26,13 @@ namespace BusterWood.Data
 
             Name = name;
             this.columns = columns;
-
+            hashCode = columns.Aggregate(0, (hc, c) => { unchecked { return hc + c.GetHashCode(); } });
         }
 
         public Schema(string name, IEnumerable<Column> columns) 
         {
             Name = name;
-            var temp = ImmutableDictionary<string, Column>.Empty.ToBuilder();
-            temp.KeyComparer = Column.NameEquality;
+            var temp = new Dictionary<string, Column>(Column.NameEquality);
             foreach (var c in columns)
             {
                 if (temp.ContainsKey(c.Name))
@@ -42,7 +41,8 @@ namespace BusterWood.Data
             }
             if (temp.Count == 0)
                 throw new ArgumentException($"Schema '{name}' must have one or more columns");
-            this.columns = temp.ToImmutable();
+            this.columns = temp;
+            hashCode = columns.Aggregate(0, (hc, c) => { unchecked { return hc + c.GetHashCode(); } });
         }
 
         public Schema(string name, params Column[] columns)
@@ -69,20 +69,20 @@ namespace BusterWood.Data
         public IEnumerator<Column> GetEnumerator() => columns.Values.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => columns.GetEnumerator();
 
-        public bool Equals(Schema other) => Count == other.Count && Enumerable.SequenceEqual(columns, other.columns);
+        public bool Equals(Schema other) => hashCode == other.hashCode && Count == other.Count && columns.Keys.All(other.columns.ContainsKey) && columns.All(kv => other[kv.Key].Equals(kv.Value));
         public override bool Equals(object obj) => obj is Schema && Equals((Schema)obj);
-        public override int GetHashCode() => columns?.Sum(c => c.GetHashCode()) ?? 0;
+        public override int GetHashCode() => hashCode;
 
         public static bool operator ==(Schema left, Schema right) => left.Equals(right);
         public static bool operator !=(Schema left, Schema right) => !left.Equals(right);
 
-        public static Schema Merge(Schema left, Schema right) => 
-            new Schema($"Merge of {left.Name} and {right.Name}", left.columns.AddRange(right.Where(r => !left.columns.ContainsKey(r.Name)).Select(c => new KeyValuePair<string, Column>(c.Name, c))));
+        //public static Schema Merge(Schema left, Schema right) => 
+        //    new Schema($"Merge of {left.Name} and {right.Name}", left.columns.AddRange(right.Where(r => !left.columns.ContainsKey(r.Name)).Select(c => new KeyValuePair<string, Column>(c.Name, c))));
 
         internal void ThrowWhenUnknownColumn(string name)
         {
             if (columns?.ContainsKey(name) != true)
-                throw new UnknownColumnException($"Unkown column {name} in schema '{Name}'");
+                throw new UnknownColumnException($"Unknown column {name} in schema '{Name}'");
         }
     }
 

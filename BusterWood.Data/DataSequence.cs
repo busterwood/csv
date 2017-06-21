@@ -78,16 +78,13 @@ namespace BusterWood.Data
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public bool Equals(Row other) => Schema == other?.Schema && Enumerable.SequenceEqual(this, other);
+        public bool Equals(Row other) => Schema == other.Schema && this.All(l => other.Contains(l));
         public override bool Equals(object obj) => Equals(obj as Row);
+
         public override int GetHashCode() => this.Aggregate(0, (hash, cv) => { unchecked { return hash + cv.GetHashCode(); } });
 
         public static bool operator ==(Row left, Row right) => Equals(left, right);
         public static bool operator !=(Row left, Row right) => !Equals(left, right);
-
-        /// <summary>Does the <paramref name="left"/> schema has the same set of columns as the <param name="right"/> schema? (column order does not matter)</summary>
-        public static bool SetEquals(Row left, Row right) => left.All(l => right.Contains(l));
-        //TODO: remove SetEquals
     }
 
     /// <summary>A row of data with a defined <see cref="Schema"/></summary>

@@ -12,7 +12,7 @@ namespace UnitTests
             var c1 = new Column("name", typeof(string));
             var s1 = new Schema("first", c1);
             var s2 = new Schema("first", c1);
-            Assert.AreEqual(s1, s2);
+            Assert.IsTrue(s1.Equals(s2));
         }
 
         [Test]
@@ -21,7 +21,7 @@ namespace UnitTests
             var c1 = new Column("name", typeof(string));
             var s1 = new Schema("first", c1);
             var s2 = new Schema("second", c1);
-            Assert.AreEqual(s1, s2);
+            Assert.IsTrue(s1.Equals(s2));
         }
 
         [Test]
@@ -31,7 +31,7 @@ namespace UnitTests
             var c2 = new Column("fred", typeof(string));
             var s1 = new Schema("first", c1);
             var s2 = new Schema("second", c1, c2);
-            Assert.AreNotEqual(s1, s2);
+            Assert.IsFalse(s1.Equals(s2));
         }
 
         [Test]
@@ -41,7 +41,7 @@ namespace UnitTests
             var c2 = new Column("fred", typeof(string));
             var s1 = new Schema("first", c1, c2);
             var s2 = new Schema("second", c2, c1);
-            Assert.AreEqual(s1, s2);
+            Assert.IsTrue(s1.Equals(s2));
         }
 
     }

@@ -26,7 +26,10 @@ namespace BusterWood.Data
         /// <remarks>Duplicates are removed from the resulting sequence</remarks>
         public static DataSequence SelectAway(this DataSequence seq, IEnumerable<string> columns)
         {
-            var newSchema = new Schema("", seq.Schema.columns.RemoveRange(columns));
+            var copy = new Dictionary<string, Column>(seq.Schema.columns, Column.NameEquality);
+            foreach (var c in columns)
+                copy.Remove(c);
+            var newSchema = new Schema("", copy);
             var newRows = seq.Select(r => new RowWithReducedSchema(newSchema, r));
             return new DerivedDataSequence(newSchema, newRows); 
         }
@@ -38,9 +41,11 @@ namespace BusterWood.Data
         /// <param name="func">function to calculate the value of the new column</param>
         public static DataSequence Extend<T>(this DataSequence seq, string columnName, Func<Row, T> func)
         {
-            var existing = seq.Schema.columns;
+            var copy = new Dictionary<string, Column>(seq.Schema.columns, Column.NameEquality);
             var col = new Column(columnName, typeof(T));
-            var newSchema = new Schema("", existing.Add(columnName, col));
+            copy.Add(columnName, col);
+            var newSchema = new Schema("", copy);
+            var existing = seq.Schema.columns;
             var newRows = seq.Select(r => new RowWithAddedColumn(newSchema, r, new ColumnValue(col, func(r))));
             return new DerivedDataSequence(newSchema, newRows);
         }
