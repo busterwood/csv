@@ -14,7 +14,7 @@ namespace BusterWood.Data
         public static DataSequence Select(this DataSequence seq, params string[] columns)
         {
             var set = new HashSet<string>(columns, Column.NameEquality);
-            var toRemove = seq.Schema.columns.Keys.Where(k => !set.Contains(k));
+            var toRemove = seq.Schema.Where(c => !set.Contains(c.Name));
             return SelectAway(seq, toRemove);
         }
 
@@ -26,13 +26,18 @@ namespace BusterWood.Data
         /// <remarks>Duplicates are removed from the resulting sequence</remarks>
         public static DataSequence SelectAway(this DataSequence seq, IEnumerable<string> columns)
         {
-            var copy = new Dictionary<string, Column>(seq.Schema.columns, Column.NameEquality);
-            foreach (var c in columns)
-                copy.Remove(c);
+            var set = new HashSet<string>(columns, Column.NameEquality);
+            var toRemove = seq.Schema.Where(c => set.Contains(c.Name));
+            return SelectAway(seq, toRemove);
+        }
+
+        public static DataSequence SelectAway(this DataSequence seq, IEnumerable<Column> columns)
+        {
+            var copy = seq.Schema.Except(columns).ToArray();
             var newSchema = new Schema("", copy);
             var newRows = seq.Select(r => new RowWithReducedSchema(newSchema, r));
             return new DerivedDataSequence(newSchema, newRows); 
-        }
+        }        
 
         /// <summary>Adds a new calculated column to an existing <paramref name="seq"/></summary>
         /// <typeparam name="T"></typeparam>
@@ -41,9 +46,8 @@ namespace BusterWood.Data
         /// <param name="func">function to calculate the value of the new column</param>
         public static DataSequence Extend<T>(this DataSequence seq, string columnName, Func<Row, T> func)
         {
-            var copy = new Dictionary<string, Column>(seq.Schema.columns, Column.NameEquality);
             var col = new Column(columnName, typeof(T));
-            copy.Add(columnName, col);
+            var copy = seq.Schema.Concat(Enumerable.Repeat(col, 1)).ToArray();
             var newSchema = new Schema("", copy);
             var existing = seq.Schema.columns;
             var newRows = seq.Select(r => new RowWithAddedColumn(newSchema, r, new ColumnValue(col, func(r))));
@@ -82,8 +86,7 @@ namespace BusterWood.Data
 
             public override object Get(string name)
             {
-                if (!Schema.columns.ContainsKey(name))
-                    throw new UnknownColumnException();
+                Schema.ThrowWhenUnknownColumn(name);
                 return inner.Get(name);
             }
 

@@ -1,10 +1,6 @@
 ﻿using BusterWood.Data;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UnitTests
 {
@@ -67,6 +63,7 @@ namespace UnitTests
 
             var result = orig.SelectAway("world");
             Assert.AreEqual(1, result.Schema.Count);
+            Assert.AreEqual("Hello", result.Schema.First().Name);
             Assert.AreEqual(typeof(string), result.Schema["hello"].Type);
         }
     }

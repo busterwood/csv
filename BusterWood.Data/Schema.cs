@@ -14,62 +14,57 @@ namespace BusterWood.Data
     /// <remarks>This type is immuatable and cannot be changed (mutated)</remarks>
     public struct Schema : IReadOnlyCollection<Column>, IEquatable<Schema>
     {
-        internal readonly IDictionary<string, Column> columns;
+        internal readonly Column[] columns;
         readonly int hashCode;
 
-        internal Schema(string name, IDictionary<string, Column> columns)
+        public Schema(string name, IEnumerable<Column> columns) : this(name, columns?.ToArray())
         {
-            if (columns == null)
-                throw new ArgumentNullException(nameof(columns));
-            if (columns.Count == 0)
-                throw new ArgumentException($"Schema '{name}' must have one or more columns");
-
-            Name = name;
-            this.columns = columns;
-            hashCode = columns.Aggregate(0, (hc, c) => { unchecked { return hc + c.GetHashCode(); } });
-        }
-
-        public Schema(string name, IEnumerable<Column> columns) 
-        {
-            Name = name;
-            var temp = new Dictionary<string, Column>(Column.NameEquality);
-            foreach (var c in columns)
-            {
-                if (temp.ContainsKey(c.Name))
-                    throw new ArgumentException($"Schema must have unqiue columns: {c} is duplicated");
-                temp.Add(c.Name, c);
-            }
-            if (temp.Count == 0)
-                throw new ArgumentException($"Schema '{name}' must have one or more columns");
-            this.columns = temp;
-            hashCode = columns.Aggregate(0, (hc, c) => { unchecked { return hc + c.GetHashCode(); } });
         }
 
         public Schema(string name, params Column[] columns)
-            : this(name, (IEnumerable<Column>)columns)
         {
+            if (columns == null)
+                throw new ArgumentNullException(nameof(columns));
+            if (columns.Length == 0)
+                throw new ArgumentException($"Schema '{name}' must have one or more columns");
+            
+            Name = name;
+            this.columns = columns;
+
+            var temp = new HashSet<string>(Column.NameEquality);
+            foreach (var c in columns)
+            {
+                if (temp.Contains(c.Name))
+                    throw new ArgumentException($"Schema must have unqiue columns: {c} is duplicated");
+                temp.Add(c.Name);
+            }
+
+            hashCode = columns.Aggregate(0, (hc, c) => { unchecked { return hc + c.GetHashCode(); } });
         }
 
         /// <summary>The name of this schema (optional)</summary>
         public string Name { get; }
 
-        public int Count => columns?.Count ?? 0;
+        public int Count => columns?.Length ?? 0;
 
         public Column this[string name]
         {
             get
             {
-                Column col;
-                if (!columns.TryGetValue(name, out col))
-                    throw new UnknownColumnException($"Cannot find column '{name}' in schema '{Name}'");
-                return col;
+                var eq = Column.NameEquality;
+                foreach (var c in columns)
+                {
+                    if (eq.Equals(c.Name, name))
+                        return c;
+                }
+                throw new UnknownColumnException($"Cannot find column '{name}' in schema '{Name}'");
             }
         }
 
-        public IEnumerator<Column> GetEnumerator() => columns.Values.GetEnumerator();
+        public IEnumerator<Column> GetEnumerator() => ((IEnumerable<Column>)columns).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => columns.GetEnumerator();
 
-        public bool Equals(Schema other) => hashCode == other.hashCode && Count == other.Count && columns.Keys.All(other.columns.ContainsKey) && columns.All(kv => other[kv.Key].Equals(kv.Value));
+        public bool Equals(Schema other) => hashCode == other.hashCode && Count == other.Count && columns.All(other.columns.Contains);
         public override bool Equals(object obj) => obj is Schema && Equals((Schema)obj);
         public override int GetHashCode() => hashCode;
 
@@ -81,7 +76,7 @@ namespace BusterWood.Data
 
         internal void ThrowWhenUnknownColumn(string name)
         {
-            if (columns?.ContainsKey(name) != true)
+            if (columns?.Any(c => c.NameEquals(name)) != true)
                 throw new UnknownColumnException($"Unknown column {name} in schema '{Name}'");
         }
     }
