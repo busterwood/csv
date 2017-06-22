@@ -22,7 +22,7 @@ namespace BusterWood.Data
             var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(assemblyName), AssemblyBuilderAccess.RunAndSave);
             var moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName, assemblyName + ".dll");
 
-            TypeBuilder builder = moduleBuilder.DefineType($"{assemblyName}.{from.Name}", TypeAttributes.Public);
+            TypeBuilder builder = moduleBuilder.DefineType($"{assemblyName}.{from.Name}", TypeAttributes.Public | TypeAttributes.Sealed);
 
             var innerFld = builder.DefineField("_inner", from, FieldAttributes.Private | FieldAttributes.InitOnly);
 
@@ -44,7 +44,7 @@ namespace BusterWood.Data
             var ctor = typeBuilder.DefineConstructor(Public, HasThis, new[] { from });
             var il = ctor.GetILGenerator();
             il.Emit(OpCodes.Ldarg_0); // push this
-            il.Emit(OpCodes.Call, typeof(object).GetConstructor(EmptyTypes));
+            il.Emit(OpCodes.Call, typeof(object).GetConstructor(EmptyTypes));  // call object ctor
 
             il.Emit(OpCodes.Ldarg_0); // push this
             il.Emit(OpCodes.Ldarg_1); // push inner
