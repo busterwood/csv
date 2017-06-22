@@ -64,14 +64,14 @@ namespace BusterWood.Data
         public virtual T Get<T>(string name) => ValueOrDefault<T>(Get(name));
 
         //TODO: check the schema type before attempting type conversion
-        public string String(string name) => (string)Get(name);
-        public short Short(string name) => ValueOrDefault<short>(Get(name));
-        public int Int(string name) => ValueOrDefault<int>(Get(name));
-        public long Long(string name) => ValueOrDefault<long>(Get(name));
-        public double Double(string name) => ValueOrDefault<double>(Get(name));
-        public decimal Decimal(string name) => ValueOrDefault<decimal>(Get(name));
-        public bool Bool(string name) => ValueOrDefault<bool>(Get(name));
-        public DateTime DateTime(string name) => ValueOrDefault<DateTime>(Get(name));
+        public virtual string String(string name) => (string)Get(name);
+        public virtual short Short(string name) => ValueOrDefault<short>(Get(name));
+        public virtual int Int(string name) => ValueOrDefault<int>(Get(name));
+        public virtual long Long(string name) => ValueOrDefault<long>(Get(name));
+        public virtual double Double(string name) => ValueOrDefault<double>(Get(name));
+        public virtual decimal Decimal(string name) => ValueOrDefault<decimal>(Get(name));
+        public virtual bool Bool(string name) => ValueOrDefault<bool>(Get(name));
+        public virtual DateTime DateTime(string name) => ValueOrDefault<DateTime>(Get(name));
 
         /// <summary>Returns a sequnce of values for each <see cref="Column"/> in the <see cref="Schema"/></summary>
         public virtual IEnumerator<ColumnValue> GetEnumerator() => Schema.Select(col => new ColumnValue(col, Get(col.Name))).GetEnumerator();

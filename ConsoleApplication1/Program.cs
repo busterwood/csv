@@ -11,6 +11,13 @@ namespace ConsoleApplication1
     {
         static void Main(string[] args)
         {
+            var c1 = new Class1("fred", 1, DateTime.Now);
+            var t1 = TypeExtender.Extend(typeof(Class1), new Column("Size", typeof(double)));
+            var ext1 = Activator.CreateInstance(t1, c1, 2d);
+
+            var t2 = TypeRestrictor.Restrict(ext1.GetType(), new string[] { "Id", "Size" });
+            var ext2 = Activator.CreateInstance(t2, ext1);
+
             var seq = Enumerable.Range(1, 1000000).Select(i => new { Text = "hello", Id = i, OptId = (int?)i, When = new DateTime(i) }).ToDataSequence("test");
             foreach (var item in seq)
             {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -66,37 +67,41 @@ namespace BusterWood.Data
             private static bool IsNullableValueType() => typeof(T).IsValueType && typeof(T).IsConstructedGenericType && typeof(T).GetGenericTypeDefinition() == typeof(Nullable<>);
         }
 
-        class ReflectionRow<T> : Row
-        {
-#pragma warning disable RECS0108 // Warns about static fields in generic types
-            static readonly IReadOnlyDictionary<string, MemberInfo> membersByName = ReadableMembers(typeof(T)).ToDictionary(m => m.Name, Column.NameEquality);
-            readonly object item;
-
-            public ReflectionRow(Schema schema, object item) : base(schema) // force boxing of structs by requiring object
-            {
-                this.item = item;
-            }
-
-            public override object Get(string name) => GetValue(membersByName[name]);
-
-            object GetValue(MemberInfo m) => m is PropertyInfo ? ((PropertyInfo)m).GetValue(item) : ((FieldInfo)m).GetValue(item);
-        }
-
 
         class ExpressionRow<T> : Row
         {
 #pragma warning disable RECS0108 // Warns about static fields in generic types
-            static readonly IReadOnlyDictionary<string, Func<T, object>> funcsByName = BuildFunctions(ReadableMembers(typeof(T)).ToDictionary(m => m.Name, Column.NameEquality));
+            static readonly Dictionary<string, Func<T, object>> objByName = ReadObjs(ReadableMembers(typeof(T)).ToDictionary(m => m.Name, Column.NameEquality));
+            static readonly SmallMap<string, Func<T, string>> stringByName = MembersOfType<string>();
+            static readonly SmallMap<string, Func<T, int>> intByName = MembersOfType<int>();
+            static readonly SmallMap<string, Func<T, DateTime>> dateTimeByName = MembersOfType<DateTime>();
 
-            static IReadOnlyDictionary<string, Func<T, object>> BuildFunctions(IReadOnlyDictionary<string, MemberInfo> members)
+            private static SmallMap<string, Func<T, TResult>> MembersOfType<TResult>()
             {
-                return members.Select(kv => new { kv.Key, Func = BuildFunction(kv.Value) }).ToDictionary(x => x.Key, x => x.Func, Column.NameEquality);
+                return Read<TResult>(ReadableMembers(typeof(T)).Where(m => MemberType(m) == typeof(TResult)).ToSmallMap(m => m.Name, Column.NameEquality));
             }
 
-            static Func<T, object> BuildFunction(MemberInfo member)
+            static Dictionary<string, Func<T, object>> ReadObjs(Dictionary<string, MemberInfo> members)
             {
-                var itemParam = Expression.Parameter(typeof(T));
-                var lambda = Expression.Lambda<Func<T, object>>(Expression.Convert(Expression.PropertyOrField(itemParam, member.Name), typeof(object)), itemParam);
+                return members.Select(kv => new { kv.Key, Func = ReadObj(kv.Value) }).ToDictionary(x => x.Key, x => x.Func, Column.NameEquality);
+            }
+
+            static SmallMap<string, Func<T, TResult>> Read<TResult>(SmallMap<string, MemberInfo> members)
+            {
+                return members.Select(kv => new { kv.Key, Func = Read<TResult>(kv.Value) }).ToSmallMap(x => x.Key, x => x.Func, Column.NameEquality);
+            }
+
+            static Func<T, object> ReadObj(MemberInfo member)
+            {
+                var item = Expression.Parameter(typeof(T));
+                var lambda = Expression.Lambda<Func<T, object>>(Expression.Convert(Expression.PropertyOrField(item, member.Name), typeof(object)), item);
+                return lambda.Compile();
+            }
+
+            static Func<T, TResult> Read<TResult>(MemberInfo member)
+            {
+                var item = Expression.Parameter(typeof(T));
+                var lambda = Expression.Lambda<Func<T, TResult>>(Expression.PropertyOrField(item, member.Name), item);
                 return lambda.Compile();
             }
 
@@ -107,9 +112,79 @@ namespace BusterWood.Data
                 this.item = item;
             }
 
-            public override object Get(string name) => funcsByName[name](item);
+            public override object Get(string name) => objByName[name](item);
+            public override string String(string name) => stringByName[name](item);
+            public override int Int(string name) => intByName[name](item);
+            public override DateTime DateTime(string name) => dateTimeByName[name](item);
 
         }
 
+    }
+
+    static partial class Extensions
+    {
+        internal static SmallMap<TKey, TValue> ToSmallMap<TKey, TValue>(this IEnumerable<TValue> items, Func<TValue, TKey> keySelector, IEqualityComparer<TKey> keyComparer)
+        {
+            var values = items.ToArray();
+            var keys = values.Select(keySelector).Distinct(keyComparer).ToArray();
+            return new SmallMap<TKey, TValue>(keys, values, keyComparer);
+        }
+
+        internal static SmallMap<TKey, TValue> ToSmallMap<T, TKey, TValue>(this IEnumerable<T> items, Func<T, TKey> keySelector, Func<T, TValue> valueSelector, IEqualityComparer<TKey> keyComparer)
+        {
+            var values = items.Select(valueSelector).ToArray();
+            var keys = items.Select(keySelector).Distinct(keyComparer).ToArray();
+            return new SmallMap<TKey, TValue>(keys, values, keyComparer);
+        }
+    }
+
+    struct SmallMap<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
+    {
+        TKey[] keys;
+        TValue[] values;
+        IEqualityComparer<TKey> keyComparer;
+
+        public SmallMap(TKey[] keys, TValue[] values, IEqualityComparer<TKey> keyComparer)
+        {
+            if (keys.Length != values.Length) throw new ArgumentException("Duplicate keys");
+            this.keys = keys;
+            this.values = values;
+            this.keyComparer = keyComparer;
+        }
+
+        public IEqualityComparer<TKey> KeyComparer => keyComparer ?? EqualityComparer<TKey>.Default;
+
+        public int Count => values?.Length ?? 0;
+
+        public TValue this[TKey key] 
+        {
+            get
+            {
+                int idx = IndexOf(key);
+                return idx < 0 ? default(TValue) : values[idx];
+            }
+        }
+
+        int IndexOf(TKey key)
+        {
+            int i = 0;
+            var eq = KeyComparer;
+            foreach (var k in keys)
+            {
+                if (eq.Equals(k, key))
+                    return i;
+                i++;
+            }
+            return -1;
+        }
+
+        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
+        {
+            int i = 0;
+            foreach (var k in keys)
+                yield return new KeyValuePair<TKey, TValue>(k, values[i++]);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

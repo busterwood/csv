@@ -47,6 +47,8 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Schema.cs" />
+    <Compile Include="TypeRestrictor.cs" />
+    <Compile Include="TypeExtender.cs" />
     <Compile Include="UnknownColumnException.cs" />
   </ItemGroup>
   <ItemGroup>
