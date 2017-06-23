@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BusterWood.Data
 {
-    public class Class1
+    public class Class1 : IHasSchema
     {
         public string Text { get; }
         public int Id { get; }
@@ -17,6 +18,38 @@ namespace BusterWood.Data
             this.Text = Text;
             this.Id = Id;
             this.When = When;
+        }
+
+        public IEnumerator<ColumnValue> GetEnumerator()
+        {
+            yield return new ColumnValue(new Column(nameof(Id), typeof(int)), Id);
+            yield return new ColumnValue(new Column(nameof(Text), typeof(string)), Text);
+            yield return new ColumnValue(new Column(nameof(When), typeof(DateTime)), When);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public bool Equals(IHasSchema other)
+        {
+            if (other == null) return false;
+            if (other.SchemaHashCode() != SchemaHashCode()) return false;
+            var e = other.GetEnumerator();
+
+            if (!e.MoveNext()) return false;
+            if (!Equals(Id, e.Current.Value)) return false;
+
+            if (!e.MoveNext()) return false;
+            if (!Equals(Text, e.Current.Value)) return false;
+
+            if (!e.MoveNext()) return false;
+            if (!Equals(When, e.Current.Value)) return false;
+
+            return true;
+        }
+
+        public int SchemaHashCode()
+        {
+            return 1234;
         }
     }
 
