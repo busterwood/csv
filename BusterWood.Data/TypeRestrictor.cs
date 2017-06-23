@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using static System.Reflection.MethodAttributes;
 using static System.Reflection.CallingConventions;
 
@@ -43,14 +41,11 @@ namespace BusterWood.Data
         {
             var ctor = typeBuilder.DefineConstructor(Public, HasThis, new[] { from });
             var il = ctor.GetILGenerator();
-            il.Emit(OpCodes.Ldarg_0); // push this
-            il.Emit(OpCodes.Call, typeof(object).GetConstructor(EmptyTypes));  // call object ctor
-
-            il.Emit(OpCodes.Ldarg_0); // push this
-            il.Emit(OpCodes.Ldarg_1); // push inner
-            il.Emit(OpCodes.Stfld, innerFld); // store the parameter in the inner field
-
-            il.Emit(OpCodes.Ret);   // end of ctor
+            il.This(); // push this
+            il.Call(typeof(object).GetConstructor(EmptyTypes));  // call object ctor
+            il.This(); // push this
+            il.Arg1().Store(innerFld); // store the parameter in the inner field
+            il.Return();
             return ctor;
         }
 
@@ -59,9 +54,8 @@ namespace BusterWood.Data
             var prop = builder.DefineProperty(col.Name, PropertyAttributes.HasDefault, col.Type, null);
             var getMethod = builder.DefineMethod("get_" + col.Name, Public | SpecialName | HideBySig, col.Type, Type.EmptyTypes);
             var il = getMethod.GetILGenerator();
-            il.Emit(OpCodes.Ldarg_0); // push this
-            il.Emit(OpCodes.Ldfld, extraFld);
-            il.Emit(OpCodes.Ret);
+            il.This().Load(extraFld);
+            il.Return();
             prop.SetGetMethod(getMethod);
             return prop;
         }
@@ -71,10 +65,8 @@ namespace BusterWood.Data
             var prop = builder.DefineProperty(p.Name, PropertyAttributes.HasDefault, p.PropertyType, null);
             var getMethod = builder.DefineMethod("get_" + p.Name, Public|SpecialName|HideBySig, p.PropertyType, Type.EmptyTypes);
             var il = getMethod.GetILGenerator();
-            il.Emit(OpCodes.Ldarg_0); // push this
-            il.Emit(OpCodes.Ldfld, innerFld);
-            il.Emit(OpCodes.Callvirt, p.GetGetMethod());
-            il.Emit(OpCodes.Ret);
+            il.This().Load(innerFld).CallVirt(p.GetGetMethod());
+            il.Return();
             prop.SetGetMethod(getMethod);
             return prop;
         }

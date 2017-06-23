@@ -41,13 +41,11 @@ namespace BusterWood.Data
         {
             var ctor = typeBuilder.DefineConstructor(Public, HasThis, new[] { obj.FieldType });
             var il = ctor.GetILGenerator();
-            il.Emit(OpCodes.Ldarg_0); // push this
-            il.Emit(OpCodes.Call, typeof(object).GetConstructor(EmptyTypes)); // call object ctor
+            il.This().Call(typeof(object).GetConstructor(EmptyTypes)); // call object ctor
 
-            il.Emit(OpCodes.Ldarg_0); // push this
-            il.Emit(OpCodes.Ldarg_1); // push _obj
-            il.Emit(OpCodes.Stfld, obj); // store the parameter in the inner field
-            il.Emit(OpCodes.Ret);
+            il.This().Arg1(); // push _obj
+            il.Store(obj); // store the parameter in the inner field
+            il.Return();
             return ctor;
         }
 
@@ -56,9 +54,8 @@ namespace BusterWood.Data
             var prop = typeBuilder.DefineProperty("Current", PropertyAttributes.HasDefault, typeof(ColumnValue), null);
             var getMethod = typeBuilder.DefineMethod("get_Current", Public | Virtual | Final | SpecialName | HideBySig, HasThis, typeof(ColumnValue), Type.EmptyTypes);
             var il = getMethod.GetILGenerator();
-            il.Emit(OpCodes.Ldarg_0); // push this
-            il.Emit(OpCodes.Ldfld, current);
-            il.Emit(OpCodes.Ret);
+            il.This().Load(current);
+            il.Return();
             prop.SetGetMethod(getMethod);
         }
 
@@ -73,10 +70,10 @@ namespace BusterWood.Data
 
             // define a switch label for each column + 1 for "before first"
             var labels = Enumerable.Range(0, columns.Length).Select(i => il.DefineLabel()).ToArray();
-            il.Emit(OpCodes.Switch, labels);
+            il.Switch(labels);
 
             // default case is return false
-            Return(il, false);
+            il.Return(false);
 
             // fore each column
             int idx = 0;
@@ -87,62 +84,48 @@ namespace BusterWood.Data
                 GetPropertyValue(il, obj, col);
                 StoreCurrent(il, current);
                 StoreNextState(il, state, idx + 1);
-                Return(il, true);
+                il.Return(true);
                 idx++;
             }
         }
 
         private static void LoadState(ILGenerator il, FieldBuilder state)
         {
-            il.Emit(OpCodes.Ldarg_0); // push this
-            il.Emit(OpCodes.Ldfld, state);
+            il.This().Load(state);
         }
 
         static void NewColumn(ILGenerator il, PropertyInfo column)
         {
-            il.Emit(OpCodes.Ldarg_0); // push this
-            il.Emit(OpCodes.Ldstr, column.Name);
-            il.Emit(OpCodes.Ldtoken, column.PropertyType);
-            il.Emit(OpCodes.Call, typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle)));
-            il.Emit(OpCodes.Newobj, typeof(Column).GetConstructor(new[] { typeof(string), typeof(Type) }));
+            il.This().Load(column.Name);
+            il.Load(column.PropertyType);
+            il.New(typeof(Column).GetConstructor(new[] { typeof(string), typeof(Type) }));
         }
 
         static void GetPropertyValue(ILGenerator il, FieldBuilder obj, PropertyInfo column)
         {
-            il.Emit(OpCodes.Ldarg_0); // push this
-            il.Emit(OpCodes.Ldfld, obj);
-            il.Emit(OpCodes.Callvirt, column.GetGetMethod());
+            il.This().Load(obj);
+            il.CallVirt(column.GetGetMethod());
             if (column.PropertyType.IsValueType)
-               il.Emit(OpCodes.Box, column.PropertyType); // box so we can store as a column value
+               il.Box(column.PropertyType); // box so we can store as a column value
         }
 
         static void StoreCurrent(ILGenerator il, FieldBuilder current)
         {
-            il.Emit(OpCodes.Newobj, typeof(ColumnValue).GetConstructor(new[] { typeof(Column), typeof(object) }));
-            il.Emit(OpCodes.Stfld, current);
+            il.New(typeof(ColumnValue).GetConstructor(new[] { typeof(Column), typeof(object) }));
+            il.Store(current);
         }
 
         static void StoreNextState(ILGenerator il, FieldBuilder state, int value)
         {
-            il.Emit(OpCodes.Ldarg_0); // push this
-            il.Emit(OpCodes.Ldc_I4, value); // push next state value;
-            il.Emit(OpCodes.Stfld, state); // store the state
-        }
-
-        static void Return(ILGenerator il, bool result)
-        {
-            if (result)
-                il.Emit(OpCodes.Ldc_I4_1); // return true
-            else
-                il.Emit(OpCodes.Ldc_I4_0); // return false
-            il.Emit(OpCodes.Ret);
+            il.This().Load(value); // push next state value;
+            il.Store(state); // store the state
         }
 
         static void DefineDispose(TypeBuilder typeBuilder)
         {
             var method = typeBuilder.DefineMethod(nameof(IDisposable.Dispose), Public | Virtual | Final, HasThis);
             var il = method.GetILGenerator();
-            il.Emit(OpCodes.Ret);
+            il.Return();
         }
 
         static void DefineReset(TypeBuilder typeBuilder, FieldBuilder state)
@@ -150,7 +133,7 @@ namespace BusterWood.Data
             var method = typeBuilder.DefineMethod(nameof(IEnumerator.Reset), Public | Virtual | Final, HasThis);
             var il = method.GetILGenerator();
             StoreNextState(il, state, 0); // rest state to zero
-            il.Emit(OpCodes.Ret);
+            il.Return();
         }
 
         static void DefineEnumeratorCurrent(TypeBuilder typeBuilder, FieldBuilder current)
@@ -158,10 +141,8 @@ namespace BusterWood.Data
             var prop = typeBuilder.DefineProperty(nameof(IEnumerator.Current), PropertyAttributes.HasDefault, typeof(object), null);
             var getMethod = typeBuilder.DefineMethod("get_Current", Private| Virtual | Final | SpecialName | HideBySig, HasThis, typeof(object), Type.EmptyTypes);
             var il = getMethod.GetILGenerator();
-            il.Emit(OpCodes.Ldarg_0); // push this
-            il.Emit(OpCodes.Ldfld, current);
-            il.Emit(OpCodes.Box, typeof(ColumnValue)); // cast to object
-            il.Emit(OpCodes.Ret);
+            il.This().Load(current).Box(typeof(ColumnValue));
+            il.Return();
             prop.SetGetMethod(getMethod);
             typeBuilder.DefineMethodOverride(getMethod, typeof(IEnumerator).GetProperty(nameof(IEnumerator.Current)).GetGetMethod());
         }

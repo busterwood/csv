@@ -29,6 +29,16 @@ namespace BusterWood.Data
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
+        public override bool Equals(object obj) => Equals(obj as IHasSchema);
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return SchemaHashCode() * Id.GetHashCode() * Text.GetHashCode() * When.GetHashCode();
+            }
+        }
+
         public bool Equals(IHasSchema other)
         {
             if (other == null) return false;

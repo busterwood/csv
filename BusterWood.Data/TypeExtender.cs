@@ -52,14 +52,16 @@ namespace BusterWood.Data
             var allColumns = readableProperties.Select(p => new Column(p.Name, p.PropertyType)).Concat(extra);
 
             int schemaHashCode = allColumns.Aggregate(1, (hc, col) => { unchecked { return hc * col.GetHashCode(); } });
-            var shc = DefineSchemaHash(type, schemaHashCode);
+            var shc = HasSchemaBuilder.DefineSchemaHash(type, schemaHashCode);
 
             TypeBuilder enumTypeBuilder = EnumeratorBuilder.CreateEnumeratorType(module, type);
             var enumeratorCtor = EnumeratorBuilder.DefineEnumerator(enumTypeBuilder, type, props);
-            var enm = DefineGetEnumerator(type, enumeratorCtor);
-            DefineGetGenericEnumerator(type, enumeratorCtor);
+            var enm = HasSchemaBuilder.DefineGetEnumerator(type, enumeratorCtor);
+            HasSchemaBuilder.DefineGetGenericEnumerator(type, enumeratorCtor);
 
-            DefineEqualsHasSchema(type, props, shc);
+            var equals = HasSchemaBuilder.DefineEqualsHasSchema(type, props, shc);
+            HasSchemaBuilder.DefineEqualsObject(type, equals);
+            HasSchemaBuilder.DefineGetHashCode(type, shc, props);
 
             var dynType = type.CreateTypeInfo().AsType();
             var enumType = enumTypeBuilder.CreateTypeInfo().AsType();
@@ -69,35 +71,19 @@ namespace BusterWood.Data
             return dynType;
         }
 
-        static MethodBuilder DefineSchemaHash(TypeBuilder builder, int schemaHashCode)
-        {
-            var method = builder.DefineMethod("SchemaHashCode", Public|Virtual|Final, HasThis, typeof(int), Type.EmptyTypes);
-            var il = method.GetILGenerator();
-            il.Emit(OpCodes.Ldc_I4, schemaHashCode);
-            il.Emit(OpCodes.Ret);
-            return method;
-        }
-
         static ConstructorBuilder DefineConstructor(TypeBuilder typeBuilder, Type from, FieldBuilder innerFld, Column[] extra, List<FieldBuilder> extraFlds)
         {
             var ctor = typeBuilder.DefineConstructor(Public, HasThis, new[] { from }.Concat(extra.Select(e => e.Type)).ToArray());
             var il = ctor.GetILGenerator();
-            il.Emit(OpCodes.Ldarg_0); // push this
-            il.Emit(OpCodes.Call, typeof(object).GetConstructor(EmptyTypes)); // call object ctor
+            il.This().Call(typeof(object).GetConstructor(EmptyTypes)); // call object ctor - this is the return value
 
-            il.Emit(OpCodes.Ldarg_0); // push this
-            il.Emit(OpCodes.Ldarg_1); // push inner
-            il.Emit(OpCodes.Stfld, innerFld); // store the parameter in the inner field
+            il.This().Arg1().Store(innerFld); // store the parameter in the inner field
 
             int arg = 2;
             foreach (var e in extraFlds)
-            {
-                il.Emit(OpCodes.Ldarg_0); // push this
-                il.Emit(OpCodes.Ldarg, arg++); // push extra
-                il.Emit(OpCodes.Stfld, e); // store the parameter in the field
-            }
+                il.This().Arg(arg++).Store(e); // store the parameter in the field
 
-            il.Emit(OpCodes.Ret);   // end of ctor
+            il.Return();   // end of ctor
             return ctor;
         }
 
@@ -106,9 +92,8 @@ namespace BusterWood.Data
             var prop = builder.DefineProperty(col.Name, PropertyAttributes.HasDefault, col.Type, null);
             var getMethod = builder.DefineMethod("get_" + col.Name, Public | SpecialName | HideBySig, col.Type, Type.EmptyTypes);
             var il = getMethod.GetILGenerator();
-            il.Emit(OpCodes.Ldarg_0); // push this
-            il.Emit(OpCodes.Ldfld, extraFld);
-            il.Emit(OpCodes.Ret);
+            il.This().Load(extraFld);
+            il.Return();
             prop.SetGetMethod(getMethod);
             return prop;
         }
@@ -116,42 +101,62 @@ namespace BusterWood.Data
         static PropertyBuilder DefineDelegatingProperty(TypeBuilder builder, FieldBuilder innerFld, PropertyInfo p)
         {
             var prop = builder.DefineProperty(p.Name, PropertyAttributes.HasDefault, p.PropertyType, null);
-            var getMethod = builder.DefineMethod("get_" + p.Name, Public|SpecialName|HideBySig, p.PropertyType, Type.EmptyTypes);
+            var getMethod = builder.DefineMethod("get_" + p.Name, Public | SpecialName | HideBySig, p.PropertyType, Type.EmptyTypes);
             var il = getMethod.GetILGenerator();
-            il.Emit(OpCodes.Ldarg_0); // push this
-            il.Emit(OpCodes.Ldfld, innerFld);
-            il.Emit(OpCodes.Callvirt, p.GetGetMethod());
-            il.Emit(OpCodes.Ret);
+            il.This().Load(innerFld).CallVirt(p.GetGetMethod());
+            il.Return();
             prop.SetGetMethod(getMethod);
             return prop;
         }
+    }
 
-        static MethodBuilder DefineGetEnumerator(TypeBuilder builder, ConstructorBuilder enumeratorCtor)
+    public static class HasSchemaBuilder
+    {
+        public static MethodBuilder DefineSchemaHash(TypeBuilder builder, int schemaHashCode)
+        {
+            var method = builder.DefineMethod("SchemaHashCode", Public | Virtual | Final, HasThis, typeof(int), Type.EmptyTypes);
+            var il = method.GetILGenerator();
+            il.Constant(schemaHashCode);
+            il.Return();
+            return method;
+        }
+
+        public static MethodBuilder DefineGetEnumerator(TypeBuilder builder, ConstructorBuilder enumeratorCtor)
         {
             var method = builder.DefineMethod("IEnumerable.GetEnumerator", Private | Virtual | Final | HideBySig, HasThis, typeof(IEnumerator), Type.EmptyTypes);
             var il = method.GetILGenerator();
-            il.Emit(OpCodes.Ldarg_0);
-            il.Emit(OpCodes.Newobj, enumeratorCtor);
-            il.Emit(OpCodes.Ret);
+            il.This().New(enumeratorCtor);
+            il.Return();
             builder.DefineMethodOverride(method, typeof(IEnumerable).GetMethod(nameof(IEnumerable.GetEnumerator)));
             return method;
         }
 
-        static void DefineGetGenericEnumerator(TypeBuilder builder, ConstructorBuilder enumeratorCtor)
+        public static void DefineGetGenericEnumerator(TypeBuilder builder, ConstructorBuilder enumeratorCtor)
         {
             var method = builder.DefineMethod(nameof(IEnumerable.GetEnumerator), Public | Virtual | Final | HideBySig, HasThis, typeof(IEnumerator<ColumnValue>), Type.EmptyTypes);
             var il = method.GetILGenerator();
-            il.Emit(OpCodes.Ldarg_0);
-            il.Emit(OpCodes.Newobj, enumeratorCtor);
-            il.Emit(OpCodes.Ret);
+            il.This().New(enumeratorCtor);
+            il.Return();
         }
 
-        private static void DefineEqualsHasSchema(TypeBuilder builder, List<PropertyBuilder> props, MethodBuilder schemaHasCode)
+        public static MethodBuilder DefineEqualsObject(TypeBuilder builder, MethodBuilder equalsHasSchema)
+        {
+            var method = builder.DefineMethod("Equals", Public | Virtual | HideBySig, HasThis, typeof(bool), new[] { typeof(object) });
+            var il = method.GetILGenerator();
+            il.This();
+            il.Arg1().AsType(typeof(IHasSchema));
+            il.CallVirt(equalsHasSchema);
+            il.Return();
+            builder.DefineMethodOverride(method, typeof(object).GetMethod(nameof(object.Equals), new[] { typeof(object) }));
+            return method;
+        }
+
+        public static MethodBuilder DefineEqualsHasSchema(TypeBuilder builder, List<PropertyBuilder> props, MethodBuilder schemaHasCode)
         {
             var method = builder.DefineMethod("Equals", Public | Virtual | Final | HideBySig, HasThis, typeof(bool), new[] { typeof(IHasSchema) });
             var il = method.GetILGenerator();
-            var em = il.DeclareLocal(typeof(IEnumerator<ColumnValue>));
-            var cv = il.DeclareLocal(typeof(ColumnValue));
+            var em = il.DeclareLocal<IEnumerator<ColumnValue>>();
+            var cv = il.DeclareLocal<ColumnValue>();
             var notEqual = il.DefineLabel();
 
             CheckOtherNotNull(il, notEqual);
@@ -163,69 +168,80 @@ namespace BusterWood.Data
                 MoveNext(il, em, notEqual);
                 IsPropertyEqual(il, em, notEqual, p, cv);
             }
-            
-            // return true
-            il.Emit(OpCodes.Ldc_I4_1);
-            il.Emit(OpCodes.Ret);
+            il.Return(true);
 
-            ReturnFalse(il, notEqual);
+            il.MarkLabel(notEqual);
+            il.Return(false);
+            return method;
         }
 
         private static void CheckOtherNotNull(ILGenerator il, Label notEqual)
         {
             // if (other == null) return false;
-            il.Emit(OpCodes.Ldarg_1);
-            il.Emit(OpCodes.Brfalse, notEqual);
+            il.Arg1();
+            il.BranchIfFalse(notEqual);
         }
 
         private static void CheckSchemaHash(MethodBuilder schemaHasCode, ILGenerator il, Label notEqual)
         {
             // if (other.SchemaHashCode() != SchemaHashCode()) return false;
-            il.Emit(OpCodes.Ldarg_0);
-            il.Emit(OpCodes.Call, schemaHasCode);
-            il.Emit(OpCodes.Ldarg_1);
-            il.Emit(OpCodes.Callvirt, typeof(IHasSchema).GetMethod(nameof(IHasSchema.SchemaHashCode)));
-            il.Emit(OpCodes.Bne_Un, notEqual);
+            il.This().Call(schemaHasCode);
+            il.Arg1().CallVirt<IHasSchema>(nameof(IHasSchema.SchemaHashCode));
+            il.BranchIfNotEqual(notEqual);
         }
 
         private static void GetOtherEnumerator(ILGenerator il, LocalBuilder em)
         {
             // em = other.GetEnumerator();
-            il.Emit(OpCodes.Ldarg_1);
-            il.Emit(OpCodes.Callvirt, typeof(IEnumerable<ColumnValue>).GetMethod(nameof(IEnumerable<ColumnValue>.GetEnumerator)));
-            il.Emit(OpCodes.Stloc, em);
+            il.Arg1().CallVirt<IEnumerable<ColumnValue>>("GetEnumerator");
+            il.Store(em);
         }
 
         private static void MoveNext(ILGenerator il, LocalBuilder em, Label notEqual)
         {
             // if (!e.MoveNext()) return false;
-            il.Emit(OpCodes.Ldloc, em);
-            il.Emit(OpCodes.Callvirt, typeof(IEnumerator).GetMethod("MoveNext"));
-            il.Emit(OpCodes.Brfalse, notEqual);
+            il.Load(em).CallVirt<IEnumerator>("MoveNext");
+            il.BranchIfFalse(notEqual);
         }
 
         private static void IsPropertyEqual(ILGenerator il, LocalBuilder em, Label notEqual, PropertyBuilder p, LocalBuilder cv)
         {
             //if (!Equals(Id, e.Current.Value)) return false;
-            il.Emit(OpCodes.Ldarg_0);
-            il.Emit(OpCodes.Call, p.GetMethod);
+            il.This().Call(p.GetMethod);
             if (p.PropertyType.IsValueType)
-                il.Emit(OpCodes.Box, p.PropertyType);
-            il.Emit(OpCodes.Ldloc, em);
-            il.Emit(OpCodes.Callvirt, typeof(IEnumerator<ColumnValue>).GetProperty("Current").GetMethod);
-            il.Emit(OpCodes.Stloc, cv); // store column value
-            il.Emit(OpCodes.Ldloca, cv); // push reference to column value
-            il.Emit(OpCodes.Call, typeof(ColumnValue).GetProperty("Value").GetMethod);
-            il.Emit(OpCodes.Call, typeof(object).GetMethod("Equals", BindingFlags.Static | BindingFlags.Public));
-            il.Emit(OpCodes.Brfalse, notEqual);
+                il.Box(p.PropertyType);
+            il.Load(em).GetPropertyValue<IEnumerator<ColumnValue>>("Current");
+            il.Store(cv); // store column value
+            il.LoadAddress(cv); // push reference to column value
+            il.Call(typeof(ColumnValue).GetProperty("Value").GetMethod);
+            il.Call(typeof(object).GetMethod("Equals", BindingFlags.Static | BindingFlags.Public));
+            il.BranchIfFalse(notEqual);
         }
 
-        private static void ReturnFalse(ILGenerator il, Label notEqual)
+        internal static void DefineGetHashCode(TypeBuilder type, MethodBuilder schemaHashCode, IEnumerable<PropertyInfo> props)
         {
-            // return false
-            il.MarkLabel(notEqual);
-            il.Emit(OpCodes.Ldc_I4_0);
-            il.Emit(OpCodes.Ret);
+            var method = type.DefineMethod("GetHashCode", Public | Virtual | Final | HideBySig, HasThis, typeof(int), null);
+            var il = method.GetILGenerator();
+            var locals = props.Select(p => p.PropertyType.IsValueType ? il.DeclareLocal(p.PropertyType) : null).ToList();
+            il.This().Call(schemaHashCode);
+
+            int i = 0;
+            foreach (var p in props)
+            {
+                il.This().CallGetProperty(p);
+                if (locals[i] != null)
+                {
+                    il.Store(locals[i]);
+                    il.LoadAddress(locals[i]);
+                    il.Call(p.PropertyType.GetMethod("GetHashCode"));
+                }
+                else
+                    il.CallVirt(p.PropertyType.GetMethod("GetHashCode"));
+                il.Multiply();
+                i++;
+            }
+            il.Return();
+            type.DefineMethodOverride(method, typeof(object).GetMethod("GetHashCode"));
         }
     }
 }

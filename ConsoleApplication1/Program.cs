@@ -20,16 +20,19 @@ namespace ConsoleApplication1
                 Console.WriteLine(cv);
             }
             Console.WriteLine(ext1.Equals(ext1));
+            Console.WriteLine(ext1.Equals((object)ext1));
+            Console.WriteLine(ext1.GetHashCode());
 
             //var t2 = TypeRestrictor.Restrict(ext1.GetType(), new string[] { "Id", "Size" });
             //var ext2 = Activator.CreateInstance(t2, ext1);
 
             var sw = new Stopwatch();
-            sw.Start();
             var seq = Enumerable.Range(1, 100000)
                 .Select(i => new Class1("hello", i, new DateTime(i)))
-                .Select(c => Activator.CreateInstance(t1, c, c.Id * 2.5d, "bad"));
-            foreach (dynamic item in seq)
+                .Select(c => Activator.CreateInstance(t1, c, c.Id * 2.5d, "bad")) //TODO: factory method - if fac just in Extend(....)
+                .ToList();
+            sw.Start();
+            foreach (dynamic item in seq.Distinct())
             {
                 GC.KeepAlive(item.Text);
                 GC.KeepAlive(item.Id);
