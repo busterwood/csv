@@ -10,6 +10,8 @@ namespace ConsoleApplication1
 {
     class Program
     {
+        private const int Max = 1000000;
+
         static void Main(string[] args)
         {
             var sw = new Stopwatch();
@@ -31,7 +33,7 @@ namespace ConsoleApplication1
 
         private static void RunObject()
         {
-            var seq = Enumerable.Range(1, 1000000).Select(i => new { Text = "hello", Id = i, OptId = (int?)i, When = new DateTime(i) });
+            var seq = Enumerable.Range(1, Max).Select(i => new { Text = "hello", Id = i, OptId = (int?)i, When = new DateTime(i) });
             foreach (var item in seq)
             {
                 GC.KeepAlive(item.Text);
@@ -44,7 +46,7 @@ namespace ConsoleApplication1
 
         private static void RunDynamicObj()
         {
-            var seq = Enumerable.Range(1, 1000000).Select(i => new { Text = "hello", Id = i, OptId = (int?)i, When = new DateTime(i) });
+            var seq = Enumerable.Range(1, Max).Select(i => new { Text = "hello", Id = i, OptId = (int?)i, When = new DateTime(i) });
             foreach (dynamic item in seq)
             {
                 GC.KeepAlive(item.Text);
@@ -56,7 +58,7 @@ namespace ConsoleApplication1
 
         private static void RunDataSequence()
         {
-            var seq = Enumerable.Range(1, 1000000).Select(i => new { Text = "hello", Id = i, OptId = (int?)i, When = new DateTime(i) }).ToDataSequence("test");
+            var seq = Enumerable.Range(1, Max).Select(i => new { Text = "hello", Id = i, OptId = (int?)i, When = new DateTime(i) }).ToDataSequence("test");
             foreach (var item in seq)
             {
                 GC.KeepAlive(item.String("Text"));
