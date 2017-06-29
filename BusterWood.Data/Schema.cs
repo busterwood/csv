@@ -47,6 +47,17 @@ namespace BusterWood.Data
 
         public int Count => columns?.Length ?? 0;
 
+        public bool Contains(string name)
+        {
+            var eq = Column.NameEquality;
+            foreach (var c in columns)
+            {
+                if (eq.Equals(c.Name, name))
+                    return true;
+            }
+            return false;
+        }
+
         public Column this[string name]
         {
             get

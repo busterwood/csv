@@ -3,9 +3,12 @@
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <HasSharedItems>true</HasSharedItems>
-    <SharedGUID>bb9663e8-1a83-4093-9a17-65626d0240bb</SharedGUID>
+    <SharedGUID>1d42da70-fe0e-4a4d-9d76-9f0cb475f575</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>Shared.Records</Import_RootNamespace>
+    <Import_RootNamespace>Shared</Import_RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions.cs" />
+  </ItemGroup>
 </Project>
