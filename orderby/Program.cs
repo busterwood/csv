@@ -19,12 +19,9 @@ namespace BusterWood.orderby
 
                 Console.WriteLine(csv.Schema.Join());
                 IOrderedEnumerable<Row> orderedRows = SortRows(args, csv);
-                foreach (var row in orderedRows)
-                {
-                    var line = row.ToString();
-                    if (keepLine(line))
-                        Console.WriteLine(line);
-                }
+                var lines = orderedRows.Select(r => r.ToString()).Where(l => keepLine(l));
+                foreach (var line in lines)
+                    Console.WriteLine(line);
             }
             catch (Exception ex)
             {

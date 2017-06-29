@@ -25,17 +25,10 @@ namespace BusterWood.restrict
                 Console.WriteLine(csv.Schema.Join());
 
                 var argPairs = ArgsToPairs(args).ToList();
-                var contains = ContainsFunctions(argPairs).ToList();
-
-                foreach (var row in csv)
-                {
-                    if (contains.Any(f => f(row)) != restrictAway) // allow invertion of match
-                    {
-                        var line = row.ToString();
-                        if (keepLine(line))
-                            Console.WriteLine(row);
-                    }
-                }
+                var search = ContainsFunctions(argPairs).ToList();
+                var lines = csv.Where(row => search.Any(f => f(row)) != restrictAway).Select(row => row.ToString()).Where(l => keepLine(l));
+                foreach (var line in lines)
+                    Console.WriteLine(line);
             }
             catch (Exception ex)
             {

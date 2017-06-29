@@ -17,14 +17,11 @@ namespace BusterWood.project
                 DataSequence csv = Args.GetDataSequence(args);
                 HashSet<string> keep = ColumnsToKeep(args, csv.Schema.Select(c => c.Name));
                 Args.CheckColumnsAreValid(args, csv.Schema);
-                Console.WriteLine(csv.Schema.Where(c => keep.Contains(c.Name)).Select(c => c.Name).Join());
 
-                foreach (var row in csv)
-                {
-                    var line = row.Where(v => keep.Contains(v.Name)).Select(v => v.Value).Join();
-                    if (keepLine(line))
-                        Console.WriteLine(line);
-                }
+                Console.WriteLine(csv.Schema.Where(c => keep.Contains(c.Name)).Select(c => c.Name).Join());
+                var lines = csv.Select(row => row.Where(v => keep.Contains(v.Name)).Select(v => v.Value).Join()).Where(l => keepLine(l));
+                foreach (var line in lines)
+                    Console.WriteLine(line);
             }
             catch (Exception ex)
             {
