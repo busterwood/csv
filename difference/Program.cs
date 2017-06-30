@@ -43,7 +43,7 @@ namespace BusterWood.difference
         static void Help()
         {
             Console.Error.WriteLine($"{Programs.Name} [--all] [--in file] [file ...]");
-            Console.Error.WriteLine($"Outputs the rows in the input that do not appear in any of the additional files");
+            Console.Error.WriteLine($"Outputs the rows in the input CSV that do not appear in any of the additional files");
             Console.Error.WriteLine($"\t--all    do NOT remove duplicates from the result");
             Console.Error.WriteLine($"\t--in     read the input from a file path (rather than standard input)");
             Programs.Exit(1);

@@ -36,7 +36,7 @@ namespace BusterWood.project
         {
             if (args.Remove("--away"))
                 // project away columns, i.e. original schema without the columns listed in args
-                return new HashSet<string>(schemaCols.Except(args), StringComparer.OrdinalIgnoreCase);
+                return new HashSet<string>(schemaCols.Except(args, Column.NameEquality), Column.NameEquality);
             
             // args contains the columns to keep
             return new HashSet<string>(args, StringComparer.OrdinalIgnoreCase);

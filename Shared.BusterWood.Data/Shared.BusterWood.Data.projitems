@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>d925ae4c-9775-4d88-9682-1e93aceb5577</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Shared.BusterWood.Data</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)ClassExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CsvReaderExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReaderExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataSequence.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Schema.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UnknownColumnException.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)TODO.txt" />
+  </ItemGroup>
+</Project>

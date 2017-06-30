@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 
 namespace BusterWood.Data
@@ -152,35 +151,6 @@ namespace BusterWood.Data
             Schema.ThrowWhenUnknownColumn(name);  // allow column restriction without copying rows
             var idx = columns.IndexOf(col => string.Equals(col.Name, name, StringComparison.OrdinalIgnoreCase));
             return values[idx];
-        }
-    }
-
-    /// <summary>A row of data with a defined <see cref="Schema"/></summary>
-    /// <remarks>This type is immuatable and cannot be changed (mutated)</remarks>
-    public class MapRow : Row
-    {
-        internal readonly ImmutableDictionary<string, object> values;
-
-        public MapRow(Schema schema, params ColumnValue[] values) : base(schema)
-        {
-            if (values == null) throw new ArgumentNullException(nameof(values));
-            if (values.Length != schema.Count) throw new ArgumentException("number of values does not match number of columns", nameof(values));
-            this.values = values.ToImmutableDictionary(cv => cv.Name, cv => cv.Value, StringComparer.OrdinalIgnoreCase);
-        }
-
-        public MapRow(Schema schema, ImmutableDictionary<string, object> values) : base(schema)
-        {
-            if (values == null) throw new ArgumentNullException(nameof(values));
-            if (values.Count != schema.Count) throw new ArgumentException("number of values does not match number of columns", nameof(values));
-            this.values = values;
-        }
-        
-        public override object Get(string name)
-        {
-            Schema.ThrowWhenUnknownColumn(name); // allow column restriction without copying rows
-            object val;
-            values.TryGetValue(name, out val);
-            return val;
         }
     }
 

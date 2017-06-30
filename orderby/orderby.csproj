@@ -48,13 +48,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\BusterWood.Data\BusterWood.Data.csproj">
-      <Project>{31FBEF30-81A5-4FC5-9E4C-C03A9F9D09D1}</Project>
-      <Name>BusterWood.Data</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="..\Shared\Shared.projitems" Label="Shared" />
+  <Import Project="..\Shared.BusterWood.Data\Shared.BusterWood.Data.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
