@@ -3,6 +3,8 @@ using NUnit.Framework;
 using System.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading;
 
 namespace UnitTests
 {
@@ -82,7 +84,26 @@ namespace UnitTests
             Assert.AreEqual("world", first.Get("world"));
             Assert.AreEqual("fred", first.Get("name"));
         }
-        
+
+        [Test]
+        public void can_natural_join_on_one_column_regardless_of_case()
+        {
+            var left = Objects.ToDataSequence(new { Hello = "hello", World = "world" });
+            var right = Objects.ToDataSequence(new { hello = "hello", Name = "fred" });
+
+            //while (!Debugger.IsAttached)
+            //    Thread.Sleep(250);
+            //Debugger.Break();
+
+            var result = left.NaturalJoin(right);
+            Assert.AreEqual(3, result.Schema.Count);
+            Assert.AreEqual(1, result.Count());
+            var first = result.First();
+            Assert.AreEqual("hello", first.Get("hello"));
+            Assert.AreEqual("world", first.Get("world"));
+            Assert.AreEqual("fred", first.Get("name"));
+        }
+
         [Test]
         public void can_natural_join_on_multiple_column()
         {

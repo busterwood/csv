@@ -116,7 +116,8 @@ namespace BusterWood.Data
         public bool NameEquals(string name) => NameEquality.Equals(Name, name);
         public bool Equals(Column other) => NameEquals(other.Name) && Type == other.Type;
         public override bool Equals(object obj) => obj is Column && Equals((Column)obj);
-        public override int GetHashCode() => (Name?.GetHashCode() ?? 0) + (Type?.GetHashCode() ?? 0);
+        public override int GetHashCode() => NameHashCode() + (Type?.GetHashCode() ?? 0);
+        int NameHashCode() => Name == null ? 0 : NameEquality.GetHashCode(Name);
         public override string ToString() => Name;
 
         public static bool operator ==(Column left, Column right) => left.Equals(right);
