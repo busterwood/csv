@@ -24,6 +24,9 @@ namespace BusterWood.Csv
                     case "intersect":
                         Intersect.Run(args);
                         break;
+                    case "join":
+                        NaturalJoin.Run(args);
+                        break;
                     case "orderby":
                         OrderBy.Run(args);
                         break;
@@ -55,6 +58,8 @@ namespace BusterWood.Csv
             Console.Error.WriteLine($"Command must be one of the following:");
             Console.Error.WriteLine($"\tdiff[erence] set difference between the input and other file(s)");
             Console.Error.WriteLine($"\tintersect    set intersection between the input and other file(s)");
+            Console.Error.WriteLine($"\tjoin         natural join of the input and other file(s)");
+            Console.Error.WriteLine($"\torderby      sorts the input by one or more columns");
             Console.Error.WriteLine($"\tproject      removes columns from the input");
             Console.Error.WriteLine($"\trestrict     removes rows from the input");
             Console.Error.WriteLine($"\tunion        set union between the input and other file(s)");

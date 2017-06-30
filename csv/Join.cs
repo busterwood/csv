@@ -7,14 +7,13 @@ using System.Linq;
 
 namespace BusterWood.Csv
 {
-    class Union
+    class NaturalJoin
     {
         public static void Run(List<string> args)
         {
             try
             {
                 if (args.Remove("--help")) Help();
-                var all = args.Remove("--all");
 
                 DataSequence input = Args.GetDataSequence(args);
 
@@ -23,10 +22,7 @@ namespace BusterWood.Csv
                     .Select(r => r.reader.ToCsvDataSequence(r.file))
                     .ToList();
 
-                input.CheckSchemaCompatibility(others);
-
-                var unionOp = all ? (Func<DataSequence, DataSequence, DataSequence>)Data.Extensions.UnionAll : Data.Extensions.Union;
-                var result = others.Aggregate(input, (acc, o) => unionOp(acc, o));
+                var result = others.Aggregate(input, (left, right) => left.NaturalJoin(right));
 
                 Console.WriteLine(result.Schema.ToCsv());
                 foreach (var row in result)
@@ -41,9 +37,8 @@ namespace BusterWood.Csv
 
         static void Help()
         {
-            Console.Error.WriteLine($"csv union [--all] [--in file] [file ...]");
-            Console.Error.WriteLine($"Outputs the set union of the input CSV and some additional files");
-            Console.Error.WriteLine($"\t--all    do NOT remove duplicates from the result");
+            Console.Error.WriteLine($"csv join [--in file] [file ...]");
+            Console.Error.WriteLine($"Outputs the natural join of the input CSV and some additional files based on common columns");
             Console.Error.WriteLine($"\t--in     read the input from a file path (rather than standard input)");
             Programs.Exit(1);
         }

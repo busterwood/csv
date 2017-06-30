@@ -107,8 +107,17 @@ namespace BusterWood.Data
                 this.item = item;
             }
 
-            public override object Get(string name) => funcsByName[name](item);
-
+            public override object Get(string name)
+            {
+                try
+                {
+                    return funcsByName[name](item);
+                }
+                catch (KeyNotFoundException)
+                {
+                    throw new KeyNotFoundException($"Row does not contain column '{name}'");
+                }
+            }
         }
 
     }

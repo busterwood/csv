@@ -1,6 +1,8 @@
 ﻿using BusterWood.Data;
 using NUnit.Framework;
 using System.Linq;
+using System;
+using System.Collections.Generic;
 
 namespace UnitTests
 {
@@ -65,6 +67,61 @@ namespace UnitTests
             Assert.AreEqual(1, result.Schema.Count);
             Assert.AreEqual("Hello", result.Schema.First().Name);
             Assert.AreEqual(typeof(string), result.Schema["hello"].Type);
+        }
+
+        [Test]
+        public void can_natural_join_on_one_column()
+        {
+            var left = Objects.ToDataSequence(new { Hello = "hello", World = "world" });
+            var right = Objects.ToDataSequence(new { Hello = "hello", Name = "fred" });
+            var result = left.NaturalJoin(right);
+            Assert.AreEqual(3, result.Schema.Count);
+            Assert.AreEqual(1, result.Count());
+            var first = result.First();
+            Assert.AreEqual("hello", first.Get("hello"));
+            Assert.AreEqual("world", first.Get("world"));
+            Assert.AreEqual("fred", first.Get("name"));
+        }
+        
+        [Test]
+        public void can_natural_join_on_multiple_column()
+        {
+            var left = Objects.ToDataSequence(new { Hello = "hello", World = "world", First="one" });
+            var right = Objects.ToDataSequence(new { Hello = "hello", World = "world", Second = "two" });
+            var result = left.NaturalJoin(right);
+            Assert.AreEqual(4, result.Schema.Count);
+            Assert.AreEqual(1, result.Count());
+            var first = result.First();
+            Assert.AreEqual("hello", first.Get("hello"));
+            Assert.AreEqual("world", first.Get("world"));
+            Assert.AreEqual("one", first.Get("first"));
+            Assert.AreEqual("two", first.Get("second"));
+        }
+
+        [Test]
+        public void can_natural_one_left_to_multiple_right()
+        {
+            var left = Objects.ToDataSequence(new { Hello = "hello", World = "world" });
+            var right = Objects.ToDataSequence((IEnumerable<Hellos>)new[] { new Hellos { Hello = "hello", Name = "fred" }, new Hellos { Hello = "hello", Name = "bloggs" } });
+            var result = left.NaturalJoin(right);
+            Assert.AreEqual(3, result.Schema.Count);
+            Assert.AreEqual(2, result.Count());
+
+            var first = result.First();
+            Assert.AreEqual("hello", first.Get("hello"));
+            Assert.AreEqual("world", first.Get("world"));
+            Assert.AreEqual("fred", first.Get("name"));
+
+            var second = result.ElementAt(1);
+            Assert.AreEqual("hello", second.Get("hello"));
+            Assert.AreEqual("world", second.Get("world"));
+            Assert.AreEqual("bloggs", second.Get("name"));
+        }
+
+        class Hellos
+        {
+            public string Hello { get; set; }
+            public string Name { get; set; }
         }
     }
 }

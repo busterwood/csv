@@ -46,7 +46,7 @@ namespace BusterWood.Data
         {
             var copy = seq.Schema.Except(columns).ToArray();
             var newSchema = new Schema("", copy);
-            var newRows = seq.Select(r => new RowWithReducedSchema(newSchema, r));
+            var newRows = seq.Select(r => new ProjectedRow(newSchema, r));
             return new DerivedDataSequence(newSchema, newRows); 
         }
 
@@ -61,7 +61,7 @@ namespace BusterWood.Data
             var copy = seq.Schema.Concat(Enumerable.Repeat(col, 1)).ToArray();
             var newSchema = new Schema("", copy);
             var existing = seq.Schema.columns;
-            var newRows = seq.Select(r => new RowWithAddedColumn(newSchema, r, new ColumnValue(col, func(r))));
+            var newRows = seq.Select(r => new ExtendedRow(newSchema, r, new ColumnValue(col, func(r))));
             return new DerivedDataSequence(newSchema, newRows);
         }
 
@@ -113,12 +113,30 @@ namespace BusterWood.Data
             return new DerivedDataSequence(seq.Schema, seq.Concat(other).Distinct());
         }
 
-        private class RowWithAddedColumn : Row
-        {
-            private Row inner;
-            private ColumnValue extra;
 
-            public RowWithAddedColumn(Schema schema, Row row, ColumnValue extra) : base(schema)
+        public static DataSequence NaturalJoin(this DataSequence seq, DataSequence other)
+        {
+            var joinOn = seq.Schema.Intersect(other.Schema).ToList();
+            if (joinOn.Count == 0)
+                throw new ArgumentException($"Schemas '{seq.Schema}' and '{other.Schema}' do not have any common columns");
+
+            var joinSchema = new Schema("join", joinOn);
+            var otherByKeys = other.ToLookup(row => new ProjectedRow(joinSchema, row));
+
+            var unionSchema = new Schema($"{seq} union {other}", seq.Schema.Union(other.Schema));
+            
+            return new DerivedDataSequence(unionSchema, seq
+                .SelectMany(left => otherByKeys[new ProjectedRow(joinSchema, left)], (left, right) => new UnionedRow(unionSchema, left, right))
+                .Distinct()
+            );
+        }
+
+        private class ExtendedRow : Row
+        {
+            readonly Row inner;
+            readonly ColumnValue extra;
+
+            public ExtendedRow(Schema schema, Row row, ColumnValue extra) : base(schema)
             {
                 this.inner = row;
                 this.extra = extra;
@@ -134,11 +152,11 @@ namespace BusterWood.Data
             //TODO: override other methods?
         }
 
-        private class RowWithReducedSchema : Row
+        private class ProjectedRow : Row
         {
-            private Row inner;
+            readonly Row inner;
 
-            public RowWithReducedSchema(Schema schema, Row row) : base(schema)
+            public ProjectedRow(Schema schema, Row row) : base(schema)
             {
                 this.inner = row;
             }
@@ -151,5 +169,22 @@ namespace BusterWood.Data
 
             //TODO: override other methods?
         }
+
+        private class UnionedRow : Row
+        {
+            readonly Row left;
+            readonly Row right;
+
+            public UnionedRow(Schema schema, Row left, Row right) : base(schema)
+            {
+                this.left = left;
+                this.right = right;
+            }
+
+            public override object Get(string name) => left.Schema.Contains(name) ? left.Get(name) : right.Get(name);
+
+            //TODO: override other methods?
+        }
+
     }
 }
