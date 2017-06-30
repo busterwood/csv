@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -32,27 +33,23 @@ namespace BusterWood.Data.Shared
 
         public static string Join(this IEnumerable items, string separator = ",") => string.Join(separator, items.Cast<object>());
 
+        public static void CheckSchemaCompatibility(this DataSequence input, IEnumerable<DataSequence> others)
+        {
+            var incompatible = others.Where(seq => seq.Schema != input.Schema).ToList();
+            if (incompatible.Count > 0)
+                throw new Exception("The following have incompatible schemas: " + incompatible.Join());
+        }
     }
 
     public static class Args
     { 
         public static DataSequence GetDataSequence(List<string> args)
         {
-            var filePath = args.StringFlag("--file");
-            TextReader input = filePath == null ? Console.In : new StreamReader(filePath);
-            return input.ToCsvDataSequence(args.FirstOrDefault() ?? "stdin");
+            var file = args.StringFlag("--in")                ;
+            TextReader input = file == null ? Console.In : new StreamReader(file);
+            return input.ToCsvDataSequence(file ?? "stdin");
         }
-
-        public static Func<string, bool> KeepOrRemoveDupLines(List<string> args)
-        {
-            if (args.Remove("--dups")) // keep duplicates
-                return line => true;
-
-            // remove duplicate lines
-            var soFar = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            return line => soFar.Add(line);
-        }
-
+        
         public static void CheckColumnsAreValid(IEnumerable<string> args, Schema schema)
         {
             if (!args.Any())
@@ -60,9 +57,10 @@ namespace BusterWood.Data.Shared
 
             var invalidArgs = args.Where(a => !schema.Contains(a)).ToList();
             if (invalidArgs.Count > 0)
-                throw new Exception("One or more columns do not exist: " + invalidArgs.Join());
+                StdErr.Info("One or more columns do not exist: " + invalidArgs.Join());
         }
     }
+
 
     [System.Serializable]
     class HelpException : Exception
@@ -73,10 +71,8 @@ namespace BusterWood.Data.Shared
         protected HelpException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
 
-
     static class StdErr
     {
-        public static readonly string Name = Assembly.GetEntryAssembly().GetName().Name;
 
         public static void Warning(string message) => WriteLine(message, ConsoleColor.Red);
 
@@ -86,9 +82,20 @@ namespace BusterWood.Data.Shared
         {
             var prev = Console.ForegroundColor;
             Console.ForegroundColor = color;
-            Console.Error.WriteLine($"{Name}: {message}");
+            Console.Error.WriteLine($"{Programs.Name}: {message}");
             Console.ForegroundColor = prev;
         }
     }
-    
+ 
+    public static class Programs
+    {
+        public static readonly string Name = Assembly.GetEntryAssembly().GetName().Name;
+
+        public static void Exit(int code)
+        {
+            if (Debugger.IsAttached)
+                Debugger.Break();
+            Environment.Exit(code);
+        }
+    }   
 }

@@ -32,7 +32,7 @@ namespace UnitTests
         {
             var orig = Objects.ToDataSequence(new { Hello = "hello", World="world" });
 
-            var result = orig.Select("world");
+            var result = orig.Project("world");
             Assert.AreEqual(1, result.Schema.Count);
             Assert.AreEqual(typeof(string), result.Schema["world"].Type);
         }
@@ -50,7 +50,7 @@ namespace UnitTests
         public void project_removes_duplicate_rows()
         {
             var orig = new Temp[] { new Temp { Text = "hello", Size = 1 }, new Temp { Text = "hello", Size = 2 } }.ToDataSequence();
-            var result = orig.Select("text");
+            var result = orig.Project("text");
             Assert.AreEqual(1, result.Count());
         }
 
@@ -61,7 +61,7 @@ namespace UnitTests
         {
             var orig = Objects.ToDataSequence(new { Hello = "hello", World="world" });
 
-            var result = orig.SelectAway("world");
+            var result = orig.ProjectAway("world");
             Assert.AreEqual(1, result.Schema.Count);
             Assert.AreEqual("Hello", result.Schema.First().Name);
             Assert.AreEqual(typeof(string), result.Schema["hello"].Type);

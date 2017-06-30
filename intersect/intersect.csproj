@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{25118C47-37FC-4447-940A-31979A0FBD68}</ProjectGuid>
+    <ProjectGuid>{BD63FB75-7D3E-4AEA-9EC7-95EC49C8E0FE}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>restrict</RootNamespace>
-    <AssemblyName>restrict</AssemblyName>
+    <RootNamespace>intersect</RootNamespace>
+    <AssemblyName>intersect</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -47,10 +47,13 @@
     <None Include="Sample1.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Sample2.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BusterWood.Data\BusterWood.Data.csproj">
-      <Project>{31FBEF30-81A5-4FC5-9E4C-C03A9F9D09D1}</Project>
+      <Project>{31fbef30-81a5-4fc5-9e4c-c03a9f9d09d1}</Project>
       <Name>BusterWood.Data</Name>
     </ProjectReference>
   </ItemGroup>

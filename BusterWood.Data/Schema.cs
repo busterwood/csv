@@ -82,6 +82,8 @@ namespace BusterWood.Data
         public static bool operator ==(Schema left, Schema right) => left.Equals(right);
         public static bool operator !=(Schema left, Schema right) => !left.Equals(right);
 
+        public override string ToString() => Name;
+
         //public static Schema Merge(Schema left, Schema right) => 
         //    new Schema($"Merge of {left.Name} and {right.Name}", left.columns.AddRange(right.Where(r => !left.columns.ContainsKey(r.Name)).Select(c => new KeyValuePair<string, Column>(c.Name, c))));
 

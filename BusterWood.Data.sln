@@ -22,12 +22,21 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "project", "project\project.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "restrict", "restrict\restrict.csproj", "{25118C47-37FC-4447-940A-31979A0FBD68}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "union", "union\union.csproj", "{10467FBA-41C5-4E76-BA39-4A281417CEE4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "intersect", "intersect\intersect.csproj", "{BD63FB75-7D3E-4AEA-9EC7-95EC49C8E0FE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "difference", "difference\difference.csproj", "{817AE38B-D160-4145-93D1-F41C54EEEA83}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Shared\Shared.projitems*{10467fba-41c5-4e76-ba39-4a281417cee4}*SharedItemsImports = 4
 		Shared\Shared.projitems*{1d42da70-fe0e-4a4d-9d76-9f0cb475f575}*SharedItemsImports = 13
 		Shared\Shared.projitems*{25118c47-37fc-4447-940a-31979a0fbd68}*SharedItemsImports = 4
 		Shared\Shared.projitems*{59dc2259-6ef2-464d-8df7-a892464c92d6}*SharedItemsImports = 4
+		Shared\Shared.projitems*{817ae38b-d160-4145-93d1-f41c54eeea83}*SharedItemsImports = 4
 		Shared\Shared.projitems*{8441a8c5-c31f-4755-9186-9343b2b2ab10}*SharedItemsImports = 4
+		Shared\Shared.projitems*{bd63fb75-7d3e-4aea-9ec7-95ec49c8e0fe}*SharedItemsImports = 4
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,6 +67,18 @@ Global
 		{25118C47-37FC-4447-940A-31979A0FBD68}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{25118C47-37FC-4447-940A-31979A0FBD68}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{25118C47-37FC-4447-940A-31979A0FBD68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10467FBA-41C5-4E76-BA39-4A281417CEE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10467FBA-41C5-4E76-BA39-4A281417CEE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10467FBA-41C5-4E76-BA39-4A281417CEE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10467FBA-41C5-4E76-BA39-4A281417CEE4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD63FB75-7D3E-4AEA-9EC7-95EC49C8E0FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD63FB75-7D3E-4AEA-9EC7-95EC49C8E0FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD63FB75-7D3E-4AEA-9EC7-95EC49C8E0FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD63FB75-7D3E-4AEA-9EC7-95EC49C8E0FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{817AE38B-D160-4145-93D1-F41C54EEEA83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{817AE38B-D160-4145-93D1-F41C54EEEA83}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{817AE38B-D160-4145-93D1-F41C54EEEA83}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{817AE38B-D160-4145-93D1-F41C54EEEA83}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
