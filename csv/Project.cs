@@ -4,15 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace BusterWood.project
+namespace BusterWood.Csv
 {
-    class Program
+    class Project
     {
-        static void Main(string[] argv)
+        public static void Run(List<string> args)
         {
             try
             {
-                var args = argv.ToList();
                 if (args.Remove("--help")) Help();
                 var all = args.Remove("--all");
                 DataSequence csv = Args.GetDataSequence(args);
@@ -21,15 +20,15 @@ namespace BusterWood.project
 
                 var result = csv.Project(keep);
                 Console.WriteLine(result.Schema.ToCsv());
-                foreach (var row in result.Distinct(!all))
-                    Console.WriteLine(row.ToCsv());
+                var lines = result.Distinct(!all).Select(row => row.ToCsv()).Where(line => line.Length > 0);
+                foreach (var l in lines)
+                    Console.WriteLine(l);
             }
             catch (Exception ex)
             {
                 StdErr.Warning(ex.Message);
                 Help();
             }
-            Programs.Exit(0);
         }
 
         static HashSet<string> ColumnsToKeep(List<string> args, IEnumerable<string> schemaCols)
@@ -44,7 +43,7 @@ namespace BusterWood.project
 
         static void Help()
         {
-            Console.Error.WriteLine($"{Programs.Name} [--all] [--in file] [--away] Column [Column ...]");
+            Console.Error.WriteLine($"csv project [--all] [--in file] [--away] Column [Column ...]");
             Console.Error.WriteLine($"Outputs in the input CSV with only the specified columns");
             Console.Error.WriteLine($"\t--all   do NOT remove duplicates from the result");
             Console.Error.WriteLine($"\t--in    read the input from a file path (rather than standard input)");

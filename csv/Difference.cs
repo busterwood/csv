@@ -1,18 +1,18 @@
 ﻿using BusterWood.Data;
 using BusterWood.Data.Shared;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace BusterWood.union
+namespace BusterWood.Csv
 {
-    class Program
+    class Difference
     {
-        static void Main(string[] argv)
+        public static void Run(List<string> args)
         {
             try
             {
-                var args = argv.ToList();
                 if (args.Remove("--help")) Help();
                 var all = args.Remove("--all");
 
@@ -25,7 +25,7 @@ namespace BusterWood.union
 
                 input.CheckSchemaCompatibility(others);
 
-                var unionOp = all ? (Func<DataSequence, DataSequence, DataSequence>)Data.Extensions.UnionAll : Data.Extensions.Union;
+                var unionOp = all ? (Func<DataSequence, DataSequence, DataSequence>)Data.Extensions.DifferenceAll : Data.Extensions.Difference;
                 var result = others.Aggregate(input, (acc, o) => unionOp(acc, o));
 
                 Console.WriteLine(result.Schema.ToCsv());
@@ -37,13 +37,12 @@ namespace BusterWood.union
                 StdErr.Warning(ex.Message);
                 Help();
             }
-            Programs.Exit(1);
         }
 
         static void Help()
         {
-            Console.Error.WriteLine($"{Programs.Name} [--all] [--in file] [file ...]");
-            Console.Error.WriteLine($"Outputs the set union of the input CSV and some additional files");
+            Console.Error.WriteLine($"csv diff[erence] [--all] [--in file] [file ...]");
+            Console.Error.WriteLine($"Outputs the rows in the input CSV that do not appear in any of the additional files");
             Console.Error.WriteLine($"\t--all    do NOT remove duplicates from the result");
             Console.Error.WriteLine($"\t--in     read the input from a file path (rather than standard input)");
             Programs.Exit(1);

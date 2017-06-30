@@ -2,18 +2,16 @@
 using BusterWood.Data.Shared;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
-namespace BusterWood.orderby
+namespace BusterWood.Csv
 {
-    class Program
+    class OrderBy
     {
-        static void Main(string[] argv)
+        public static void Run(List<string> args)
         {
             try
             {
-                var args = argv.ToList();
                 if (args.Remove("--help")) Help();
                 var all = args.Remove("--all");
                 DataSequence csv = Args.GetDataSequence(args);
@@ -29,7 +27,6 @@ namespace BusterWood.orderby
                 StdErr.Warning(ex.Message);
                 Help();
             }
-            Programs.Exit(0);
         }
 
         static IOrderedEnumerable<Row> SortRows(List<string> args, IEnumerable<Row> csv)
@@ -41,7 +38,7 @@ namespace BusterWood.orderby
 
         static void Help()
         {
-            Console.Error.WriteLine($"{Programs.Name} [--all] [--in file] Column [Column ...]");
+            Console.Error.WriteLine($"csv orderby [--all] [--in file] Column [Column ...]");
             Console.Error.WriteLine($"Sorts the input CSV by one or more columns");
             Console.Error.WriteLine($"\t--all  do NOT remove duplicates from the result");
             Console.Error.WriteLine($"\t--in   read the input from a file path (rather than standard input)");

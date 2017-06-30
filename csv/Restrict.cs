@@ -4,15 +4,14 @@ using System.Collections.Generic;
 using BusterWood.Data;
 using BusterWood.Data.Shared;
 
-namespace BusterWood.restrict
+namespace BusterWood.Csv
 {
-    class Program
+    class Restrict
     {
-        static void Main(string[] argv)
+        public static void Run(List<string> args)
         {
             try
             {
-                var args = argv.ToList();
                 if (args.Remove("--help")) Help();
                 var all = args.Remove("--all");
                 var invert = args.Remove("--away"); // not equals flag, invert match
@@ -36,7 +35,6 @@ namespace BusterWood.restrict
                 StdErr.Warning(ex.Message);
                 Help();
             }
-            Programs.Exit(0);
         }
 
         private static Func<Row, bool> EqualPredicate(List<string> args)
@@ -85,7 +83,7 @@ namespace BusterWood.restrict
 
         static void Help()
         {
-            Console.Error.WriteLine($"{Programs.Name} [--all] [--in file] [--away] [--equal] Column Value [Column Value ...]");
+            Console.Error.WriteLine($"csv restrict [--all] [--in file] [--away] [--equal] Column Value [Column Value ...]");
             Console.Error.WriteLine($"Outputs rows of the input CSV where Column equals the string Value.  Multiple tests are supported.");
             Console.Error.WriteLine($"\t--all       do NOT remove duplicates from the result");
             Console.Error.WriteLine($"\t--in        read the input from a file path (rather than standard input)");

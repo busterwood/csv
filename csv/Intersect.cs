@@ -1,18 +1,18 @@
 ﻿using BusterWood.Data;
 using BusterWood.Data.Shared;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace BusterWood.intersect
+namespace BusterWood.Csv
 {
-    class Program
+    class Intersect
     {
-        static void Main(string[] argv)
+        public static void Run(List<string> args)
         {
             try
             {
-                var args = argv.ToList();
                 if (args.Remove("--help")) Help();
                 var all = args.Remove("--all");
 
@@ -37,12 +37,11 @@ namespace BusterWood.intersect
                 StdErr.Warning(ex.Message);
                 Help();
             }
-            Programs.Exit(1);
         }
 
         static void Help()
         {
-            Console.Error.WriteLine($"{Programs.Name} [--all] [--in file] [file ...]");
+            Console.Error.WriteLine($"csv intersect [--all] [--in file] [file ...]");
             Console.Error.WriteLine($"Outputs the set intersection of the input CSV and some additional files");
             Console.Error.WriteLine($"\t--all    do NOT remove duplicates from the result");
             Console.Error.WriteLine($"\t--in     read the input from a file path (rather than standard input)");
