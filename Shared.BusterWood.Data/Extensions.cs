@@ -20,9 +20,10 @@ namespace BusterWood.Data
         /// <remarks>Duplicates are removed from the resulting sequence</remarks>
         public static DataSequence Project(this DataSequence seq, IEnumerable<string> columns)
         {
-            var set = new HashSet<string>(columns, Column.NameEquality);
-            var toRemove = seq.Schema.Where(c => !set.Contains(c.Name));
-            return ProjectAway(seq, toRemove);
+            var cols = columns.Select(c => seq.Schema[c]);
+            var newSchema = new Schema("", cols);
+            var newRows = seq.Select(r => new ProjectedRow(newSchema, r));
+            return new DerivedDataSequence(newSchema, newRows);
         }
 
         /// <summary>Returns a new sequence with that only contains the requested <paramref name="columns"/> from the source <paramref name="seq"/></summary>
