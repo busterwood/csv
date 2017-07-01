@@ -45,6 +45,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Project.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Rename.cs" />
     <Compile Include="Restrict.cs" />
     <Compile Include="Join.cs" />
     <Compile Include="Union.cs" />

@@ -34,6 +34,9 @@ namespace BusterWood.Csv
                     case "select":
                         Project.Run(args);
                         break;
+                    case "rename":
+                        Rename.Run(args);
+                        break;
                     case "restrict":
                     case "where":
                         Restrict.Run(args);
@@ -63,6 +66,7 @@ namespace BusterWood.Csv
             Console.Error.WriteLine($"\tjoin            natural join of the input and other file(s)");
             Console.Error.WriteLine($"\torderby         sorts the input by one or more columns");
             Console.Error.WriteLine($"\tproject|select  removes columns from the input");
+            Console.Error.WriteLine($"\trename          changes some of the input column names");
             Console.Error.WriteLine($"\trestrict|where  removes rows from the input");
             Console.Error.WriteLine($"\tunion           set union between the input and other file(s)");
             Programs.Exit(1);

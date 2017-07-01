@@ -28,7 +28,7 @@ namespace BusterWood.Data
 
         /// <summary>Returns a new sequence with that only contains the requested <paramref name="columns"/> from the source <paramref name="seq"/></summary>
         /// <remarks>Duplicates are removed from the resulting sequence</remarks>
-        public static DataSequence Project(this DataSequence seq, params string[] columns) => Project(seq, (IEnumerable<string>) columns);
+        public static DataSequence Project(this DataSequence seq, params string[] columns) => Project(seq, (IEnumerable<string>)columns);
 
         /// <summary>Returns a new sequence with <paramref name="columns"/> removed from the source <paramref name="seq"/></summary>
         /// <remarks>Duplicates are removed from the resulting sequence</remarks>
@@ -48,7 +48,7 @@ namespace BusterWood.Data
             var copy = seq.Schema.Except(columns).ToArray();
             var newSchema = new Schema("", copy);
             var newRows = seq.Select(r => new ProjectedRow(newSchema, r));
-            return new DerivedDataSequence(newSchema, newRows); 
+            return new DerivedDataSequence(newSchema, newRows);
         }
 
         /// <summary>Adds a new calculated column to an existing <paramref name="seq"/></summary>
@@ -114,7 +114,6 @@ namespace BusterWood.Data
             return new DerivedDataSequence(seq.Schema, seq.Concat(other).Distinct());
         }
 
-
         public static DataSequence NaturalJoin(this DataSequence seq, DataSequence other)
         {
             var joinOn = seq.Schema.Intersect(other.Schema).ToList();
@@ -125,11 +124,29 @@ namespace BusterWood.Data
             var otherByKeys = other.ToLookup(row => new ProjectedRow(joinSchema, row));
 
             var unionSchema = new Schema($"{seq} union {other}", seq.Schema.Union(other.Schema));
-            
+
             return new DerivedDataSequence(unionSchema, seq
                 .SelectMany(left => otherByKeys[new ProjectedRow(joinSchema, left)], (left, right) => new UnionedRow(unionSchema, left, right))
                 .Distinct()
             );
+        }
+
+        public static DataSequence RenameAll(this DataSequence seq, IDictionary<string, string> changes)
+        {
+            var newCols = seq.Schema.Select(col => changes.ContainsKey(col.Name) ? new Column(changes[col.Name], col.Type) : col);
+            var newSchema = new Schema(seq.Schema.Name, newCols);
+            var reversedChanges = changes.ToDictionary(pair => pair.Value, pair => pair.Key, Column.NameEquality);
+            var newRows = seq.Select(r => new RenamedRow(r, reversedChanges));
+            return new DerivedDataSequence(newSchema, newRows);
+        }
+
+        public static DataSequence Rename(this DataSequence seq, IDictionary<string, string> changes)
+        {
+            var newCols = seq.Schema.Select(col => changes.ContainsKey(col.Name) ? new Column(changes[col.Name], col.Type) : col);
+            var newSchema = new Schema(seq.Schema.Name, newCols);
+            var reversedChanges = changes.ToDictionary(pair => pair.Value, pair => pair.Key, Column.NameEquality);
+            var newRows = seq.Select(r => new RenamedRow(r, reversedChanges));
+            return new DerivedDataSequence(newSchema, newRows.Distinct());
         }
 
         private class ExtendedRow : Row
@@ -187,5 +204,22 @@ namespace BusterWood.Data
             //TODO: override other methods?
         }
 
+        private class RenamedRow : Row
+        {
+            private IDictionary<string, string> changes;
+            private Row r;
+
+            public RenamedRow(Row r, IDictionary<string, string> changes) : base(r.Schema)
+            {
+                this.r = r;
+                this.changes = changes;
+            }
+
+            public override object Get(string name)
+            {
+                string oldName;
+                return changes.TryGetValue(name, out oldName) ? r.Get(oldName) : r.Get(name);
+            }
+        }
     }
 }

@@ -18,7 +18,7 @@ namespace BusterWood.Csv
                 var contains = args.Remove("--contains");
                 DataSequence csv = Args.GetDataSequence(args);
 
-                if (args.Count == 0 || args.Count % 2 != 0)
+                if (args.Count % 2 != 0)
                     throw new Exception("You must supply at pairs of paremters: column value [column value...]");
 
                 Args.CheckColumnsAreValid(args.Where((a, i) => i % 2 == 0), csv.Schema);
