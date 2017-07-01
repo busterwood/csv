@@ -17,7 +17,7 @@ namespace BusterWood.Csv
                 DataSequence input = Args.GetDataSequence(args);
 
                 if (args.Count % 2 != 0)
-                    throw new Exception("You must supply at pairs of paremters: column value [column value...]");
+                    throw new Exception("You must supply at pairs of paremters: old new [old new...]");
 
                 var changes = Changes(args);
 
