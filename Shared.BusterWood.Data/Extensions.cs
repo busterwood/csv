@@ -165,6 +165,8 @@ namespace BusterWood.Data
             return new DerivedDataSequence(newSchema, newRows.Distinct());
         }
 
+        public static DataList ToList(this DataSequence seq) => new DataList(seq.Schema, seq);
+
         private class ExtendedRow : Row
         {
             readonly Row inner;

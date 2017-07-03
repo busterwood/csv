@@ -34,6 +34,9 @@ namespace BusterWood.Csv
                     case "orderby":
                         OrderBy.Run(args);
                         break;
+                    case "pretty":
+                        PrettyPrint.Run(args);
+                        break;
                     case "project":
                     case "select":
                         Project.Run(args);
@@ -70,6 +73,7 @@ namespace BusterWood.Csv
             Console.Error.WriteLine($"\tintersect       set intersection between the input and other file(s)");
             Console.Error.WriteLine($"\tjoin            natural join of the input and other file(s)");
             Console.Error.WriteLine($"\torderby         sorts the input by one or more columns");
+            Console.Error.WriteLine($"\tpretty          formats the input CSV in aligned columns");
             Console.Error.WriteLine($"\tproject|select  removes columns from the input");
             Console.Error.WriteLine($"\trename          changes some of the input column names");
             Console.Error.WriteLine($"\trestrict|where  removes rows from the input");
