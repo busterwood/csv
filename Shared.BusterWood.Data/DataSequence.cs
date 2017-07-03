@@ -114,7 +114,7 @@ namespace BusterWood.Data
         public override object Get(string name)
         {
             Schema.ThrowWhenUnknownColumn(name);  // allow column restriction without copying rows
-            var idx = values.IndexOf(col => string.Equals(col.Name, name, StringComparison.OrdinalIgnoreCase));
+            var idx = values.IndexOf(col => Column.NameEquality.Equals(col.Name, name));
             return values[idx];
         }
 
@@ -149,7 +149,7 @@ namespace BusterWood.Data
         public override object Get(string name)
         {
             Schema.ThrowWhenUnknownColumn(name);  // allow column restriction without copying rows
-            var idx = columns.IndexOf(col => string.Equals(col.Name, name, StringComparison.OrdinalIgnoreCase));
+            var idx = columns.IndexOf(col => Column.NameEquality.Equals(col.Name, name));
             return values[idx];
         }
     }
@@ -183,7 +183,7 @@ namespace BusterWood.Data
         public static int IndexOf<T>(this T[] items, Func<T, bool> predicate)
         {
             int i = 0;
-            foreach (var item in items)
+            foreach (var item in items) // foreach loop on array avoids array bounds checks
             {
                 if (predicate(item))
                     return i;

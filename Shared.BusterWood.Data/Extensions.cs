@@ -117,44 +117,34 @@ namespace BusterWood.Data
         /// <summary>Joins to sequences based on the value of common columns</summary>
         public static DataSequence NaturalJoin(this DataSequence seq, DataSequence other, Action<IEnumerable<Column>> joinObserver = null)
         {
-            List<Column> joinOn = CommonColumns(seq, other, joinObserver);
-
+            List<Column> joinOn = CommonColumns(seq, other);
+            joinObserver?.Invoke(joinOn);
             var joinSchema = new Schema("join", joinOn);
             var otherByKeys = other.ToLookup(row => new ProjectedRow(joinSchema, row));
-
             var unionSchema = new Schema($"{seq} union {other}", seq.Schema.Union(other.Schema));
-
-            return new DerivedDataSequence(unionSchema, seq
-                .SelectMany(left => otherByKeys[new ProjectedRow(joinSchema, left)], (left, right) => new UnionedRow(unionSchema, left, right))
-                .Distinct()
-            );
+            var rows = seq.SelectMany(left => otherByKeys[new ProjectedRow(joinSchema, left)], (left, right) => new UnionedRow(unionSchema, left, right));
+            return new DerivedDataSequence(unionSchema, rows.Distinct());
         }
 
-        private static List<Column> CommonColumns(DataSequence seq, DataSequence other, Action<IEnumerable<Column>> joinObserver)
+        private static List<Column> CommonColumns(DataSequence seq, DataSequence other)
         {
             var joinOn = seq.Schema.Intersect(other.Schema).ToList();
             if (joinOn.Count == 0)
                 throw new ArgumentException($"Schemas '{seq.Schema}' and '{other.Schema}' do not have any common columns");
-
-            joinObserver?.Invoke(joinOn);
             return joinOn;
         }
 
-        /// <summary>Returns rows ferom <paramref name="seq"/> where a row exists in <paramref name="other"/> with matching values in common columns</summary>
+        /// <summary>Returns rows ferom <paramref name="seq"/> where a row EXISTS in <paramref name="other"/> with matching values in common columns</summary>
         /// <remarks>select * from X where exists (select * from Y where X.colA = Y.colA and X.colB = Y.colB and ....)</remarks>
         public static DataSequence SemiJoin(this DataSequence seq, DataSequence other, Action<IEnumerable<Column>> joinObserver = null)
         {
-            List<Column> joinOn = CommonColumns(seq, other, joinObserver);
-
+            List<Column> joinOn = CommonColumns(seq, other);
+            joinObserver?.Invoke(joinOn);
             var joinSchema = new Schema("join", joinOn);
             var otherKeys = new HashSet<ProjectedRow>(other.Select(row => new ProjectedRow(joinSchema, row)));
-
             var resultSchema = new Schema($"{seq.Schema} exists {other.Schema}", seq.Schema);
-
-            return new DerivedDataSequence(resultSchema, seq
-                .Where(row => otherKeys.Contains(new ProjectedRow(joinSchema, row)))
-                .Distinct()
-            );
+            var rows = seq.Where(row => otherKeys.Contains(new ProjectedRow(joinSchema, row)));
+            return new DerivedDataSequence(resultSchema, rows.Distinct());
         }
 
         public static DataSequence RenameAll(this DataSequence seq, IDictionary<string, string> changes)
