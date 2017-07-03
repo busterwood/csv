@@ -66,7 +66,7 @@ namespace BusterWood.Csv
             Console.Error.WriteLine($"Reads CSV from StdIn or the --in file and outputs CSV.");
             Console.Error.WriteLine($"Command must be one of the following:");
             Console.Error.WriteLine($"\tdiff[erence]    set difference between the input and other file(s)");
-            Console.Error.WriteLine($"\tsemijoin|exists only row from input where a matching row exists in other file(s)");
+            Console.Error.WriteLine($"\tsemijoin|exists rows from input where a matching row exists in other file(s)");
             Console.Error.WriteLine($"\tintersect       set intersection between the input and other file(s)");
             Console.Error.WriteLine($"\tjoin            natural join of the input and other file(s)");
             Console.Error.WriteLine($"\torderby         sorts the input by one or more columns");

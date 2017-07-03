@@ -23,7 +23,7 @@ csv command [--help] [--in file] [args...]
 Reads CSV from StdIn or the --in file and outputs CSV.
 Command must be one of the following:
         diff[erence]    set difference between the input and other file(s)
-        semijoin|exists only row from input where a matching row exists in other file(s)
+        semijoin|exists rows from input where a matching row exists in other file(s)
         intersect       set intersection between the input and other file(s)
         join            natural join of the input and other file(s)
         orderby         sorts the input by one or more columns
@@ -34,3 +34,87 @@ Command must be one of the following:
 ```
 
 The tools only support CSV at the moment, but will be extened to support JSON and XML.
+
+## csv.exe difference
+
+```
+c:\Dev\BusterWood.Data>csv diff --help
+csv diff[erence] [--all] [--in file] [--rev] [file ...]
+Outputs the rows in the input CSV that do not appear in any of the additional files
+        --all    do NOT remove duplicates from the result
+        --in     read the input from a file path (rather than standard input)
+        --rev    reverse the difference
+```
+
+## csv.exe semijoin (exists)
+
+```
+csv exists [--in file] [file ...]
+Outputs the input CSV where only if a row exists in the additional input files with matching values in common columns.
+        --in     read the input from a file path (rather than standard input)
+```
+
+## csv.exe intersect
+
+```
+csv intersect [--all] [--in file] [file ...]
+Outputs the set intersection of the input CSV and some additional files
+        --all    do NOT remove duplicates from the result
+        --in     read the input from a file path (rather than standard input)
+```
+
+## csv.exe join
+
+```
+csv join [--in file] [file ...]
+Outputs the natural join of the input CSV and some additional files based on common columns
+        --in     read the input from a file path (rather than standard input)
+```
+
+## csv.exe orderby
+
+```
+csv orderby [--all] [--in file] Column [Column ...]
+Sorts the input CSV by one or more columns
+        --all  do NOT remove duplicates from the result
+        --in   read the input from a file path (rather than standard input)
+```
+
+## csv.exe project (select)
+
+```
+csv project [--all] [--in file] [--away] Column [Column ...]
+Outputs in the input CSV with only the specified columns
+        --all   do NOT remove duplicates from the result
+        --in    read the input from a file path (rather than standard input)
+        --away  removes the input columns from the source
+```
+
+## csv.exe rename
+
+```
+csv rename [--in file] [old new...]
+Outputs the input CSV chaning the name of one or more columns.
+        --all    do NOT remove duplicates from the result
+        --in     read the input from a file path (rather than standard input)
+```
+
+## csv.exe restrict
+
+```
+csv restrict [--all] [--in file] [--away] [--equal] Column Value [Column Value ...]
+Outputs rows of the input CSV where Column equals the string Value.  Multiple tests are supported.
+        --all       do NOT remove duplicates from the result
+        --in        read the input from a file path (rather than standard input)
+        --away      removes rows from the input that match the test(s)
+        --contains  changes the test to be Column contains Value, rather that equality
+```
+
+## csv.exe union
+
+```
+csv union [--all] [--in file] [file ...]
+Outputs the set union of the input CSV and some additional files
+        --all    do NOT remove duplicates from the result
+        --in     read the input from a file path (rather than standard input)
+```
