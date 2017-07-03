@@ -14,6 +14,7 @@ namespace BusterWood.Csv
             try
             {
                 if (args.Remove("--help")) Help();
+                var observer = Args.VerboseJoinObserver(args);
 
                 DataSequence input = Args.GetDataSequence(args);
 
@@ -22,7 +23,7 @@ namespace BusterWood.Csv
                     .Select(r => r.reader.ToCsvDataSequence(r.file))
                     .ToList();
 
-                var result = others.Aggregate(input, (left, right) => left.NaturalJoin(right));
+                var result = others.Aggregate(input, (left, right) => left.NaturalJoin(right, observer));
 
                 Console.WriteLine(result.Schema.ToCsv());
                 foreach (var row in result)

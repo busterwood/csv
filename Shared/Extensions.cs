@@ -42,7 +42,15 @@ namespace BusterWood.Data.Shared
     }
 
     public static class Args
-    { 
+    {
+
+        public static Action<IEnumerable<Column>> VerboseJoinObserver(List<string> args)
+        {
+            var verbose = args.Remove("--verbose");
+            var observer = verbose ? cols => StdErr.Info("joining on " + string.Join(" and ", cols)) : new Action<IEnumerable<Column>>(cols => { });
+            return observer;
+        }
+
         public static DataSequence GetDataSequence(List<string> args)
         {
             var file = args.StringFlag("--in")                ;
