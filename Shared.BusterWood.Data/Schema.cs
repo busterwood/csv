@@ -39,9 +39,14 @@ namespace BusterWood.Data
         {
             Name = name;
             this.columns = columns ?? throw new ArgumentNullException(nameof(columns));
-            if (columns.Length == 0)
-                throw new ArgumentException($"Schema '{name}' must have one or more columns");
 
+            CheckForDuplicateColumns(columns);
+
+            hashCode = columns.Aggregate(0, (hc, c) => { unchecked { return hc + c.GetHashCode(); } });
+        }
+
+        static void CheckForDuplicateColumns(Column[] columns)
+        {
             var temp = new HashSet<string>(Column.NameEquality);
             foreach (var c in columns)
             {
@@ -49,8 +54,6 @@ namespace BusterWood.Data
                     throw new ArgumentException($"Schema must have unqiue columns: {c} is duplicated");
                 temp.Add(c.Name);
             }
-
-            hashCode = columns.Aggregate(0, (hc, c) => { unchecked { return hc + c.GetHashCode(); } });
         }
 
         /// <summary>The name of this schema (optional)</summary>
