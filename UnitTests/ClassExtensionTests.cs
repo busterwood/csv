@@ -36,7 +36,7 @@ namespace UnitTests
         [Test]
         public void can_iterate_large_number_of_objects()
         {
-            var seq = Enumerable.Range(1, 100000).Select(i => new { Text = "hello", Id = i, OptId = (int?)i, When = new DateTime(i) }).ToDataSequence("test");
+            var seq = Enumerable.Range(1, 100000).Select(i => new { Text = "hello", Id = i, OptId = (int?)i, When = new DateTime(i) }).ToRelation("test");
             foreach (var item in seq)
             {
                 GC.KeepAlive(item.String("Text"));

@@ -44,7 +44,7 @@ namespace UnitTests
         [Test]
         public void can_create_data_sequence()
         {
-            var orig = new Temp[] { new Temp { Text = "hello", Size = 1 }, new Temp { Text = "hello", Size = 2 } }.ToDataSequence();
+            var orig = new Temp[] { new Temp { Text = "hello", Size = 1 }, new Temp { Text = "hello", Size = 2 } }.ToRelation();
             Assert.AreEqual(2, orig.Schema.Count);
             Assert.AreEqual(typeof(string), orig.Schema["TEXT"].Type);
             Assert.AreEqual(typeof(int), orig.Schema["SIZE"].Type);
@@ -53,7 +53,7 @@ namespace UnitTests
         [Test]
         public void project_removes_duplicate_rows()
         {
-            var orig = new Temp[] { new Temp { Text = "hello", Size = 1 }, new Temp { Text = "hello", Size = 2 } }.ToDataSequence();
+            var orig = new Temp[] { new Temp { Text = "hello", Size = 1 }, new Temp { Text = "hello", Size = 2 } }.ToRelation();
             var result = orig.Project("text");
             Assert.AreEqual(1, result.Count());
         }
@@ -123,7 +123,7 @@ namespace UnitTests
         public void can_natural_one_left_to_multiple_right()
         {
             var left = Objects.ToDataSequence(new { Hello = "hello", World = "world" });
-            var right = Objects.ToDataSequence((IEnumerable<Hellos>)new[] { new Hellos { Hello = "hello", Name = "fred" }, new Hellos { Hello = "hello", Name = "bloggs" } });
+            var right = Objects.ToRelation((IEnumerable<Hellos>)new[] { new Hellos { Hello = "hello", Name = "fred" }, new Hellos { Hello = "hello", Name = "bloggs" } });
             var result = left.NaturalJoin(right);
             Assert.AreEqual(3, result.Schema.Count);
             Assert.AreEqual(2, result.Count());

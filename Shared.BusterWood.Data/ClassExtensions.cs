@@ -22,7 +22,7 @@ namespace BusterWood.Data
 {
     public static class Objects
     {
-        public static Relation ToDataSequence<T>(this IEnumerable<T> items, string name = null)
+        public static Relation ToRelation<T>(this IEnumerable<T> items, string name = null)
         {
             var schema = ToSchema<T>(name);
             return new ObjectSequence<T>(schema, items);
@@ -48,14 +48,13 @@ namespace BusterWood.Data
 
         static Type MemberType(MemberInfo m) => m is PropertyInfo ? ((PropertyInfo)m).PropertyType : ((FieldInfo)m).FieldType;
 
-        class ObjectSequence<T> : Relation
+        public class ObjectSequence<T> : Relation
         {
             readonly IEnumerable<T> items;
 
             public ObjectSequence(Schema schema, IEnumerable<T> items) : base(schema)
             {
-                if (items == null) throw new ArgumentNullException(nameof(items));
-                this.items = items;
+                this.items = items ?? throw new ArgumentNullException(nameof(items));
             }
 
             protected override IEnumerable<Row> GetSequence() => items.Select(item => new ExpressionRow<T>(Schema, item));
@@ -83,32 +82,16 @@ namespace BusterWood.Data
                 return t.GetTypeInfo().IsValueType && t.IsConstructedGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>);
             }
         }
-
-        class ReflectionRow<T> : Row
-        {
-#pragma warning disable RECS0108 // Warns about static fields in generic types
-            static readonly IReadOnlyDictionary<string, MemberInfo> membersByName = ReadableMembers(typeof(T)).ToDictionary(m => m.Name, Column.NameEquality);
-            readonly object item;
-
-            public ReflectionRow(Schema schema, object item) : base(schema) // force boxing of structs by requiring object
-            {
-                this.item = item;
-            }
-
-            public override object Get(string name) => GetValue(membersByName[name]);
-
-            object GetValue(MemberInfo m) => m is PropertyInfo ? ((PropertyInfo)m).GetValue(item) : ((FieldInfo)m).GetValue(item);
-        }
-
+      
 
         class ExpressionRow<T> : Row
         {
 #pragma warning disable RECS0108 // Warns about static fields in generic types
-            static readonly IReadOnlyDictionary<string, Func<T, object>> funcsByName = BuildFunctions(ReadableMembers(typeof(T)).ToDictionary(m => m.Name, Column.NameEquality));
+            static readonly KeyValuePair<string, Func<T, object>>[] funcsByName = BuildFunctions(ReadableMembers(typeof(T)).ToDictionary(m => m.Name, Column.NameEquality)).ToArray();
 
-            static IReadOnlyDictionary<string, Func<T, object>> BuildFunctions(IReadOnlyDictionary<string, MemberInfo> members)
+            static IEnumerable<KeyValuePair<string, Func<T, object>>> BuildFunctions(IReadOnlyDictionary<string, MemberInfo> members)
             {
-                return members.Select(kv => new { kv.Key, Func = BuildFunction(kv.Value) }).ToDictionary(x => x.Key, x => x.Func, Column.NameEquality);
+                return members.Select(kv => new { kv.Key, Func = BuildFunction(kv.Value) }).Select(x => new KeyValuePair<string, Func<T, object>>(x.Key, x.Func));
             }
 
             static Func<T, object> BuildFunction(MemberInfo member)
@@ -127,14 +110,13 @@ namespace BusterWood.Data
 
             public override object Get(string name)
             {
-                try
+                var eq = Column.NameEquality;
+                foreach (var pair in funcsByName)
                 {
-                    return funcsByName[name](item);
+                    if (eq.Equals(pair.Key, name))
+                        return pair.Value(item);
                 }
-                catch (KeyNotFoundException)
-                {
-                    throw new KeyNotFoundException($"Row does not contain column '{name}'");
-                }
+                throw new KeyNotFoundException($"Row does not contain column '{name}'");
             }
         }
 
