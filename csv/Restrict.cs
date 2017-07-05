@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Collections.Generic;
 using BusterWood.Data;
-using BusterWood.Data.Shared;
 
 namespace BusterWood.Csv
 {

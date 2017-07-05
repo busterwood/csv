@@ -1,31 +1,26 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusterWood.Data", "BusterWood.Data\BusterWood.Data.csproj", "{31FBEF30-81A5-4FC5-9E4C-C03A9F9D09D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BusterWood.Data", "BusterWood.Data\BusterWood.Data.csproj", "{31FBEF30-81A5-4FC5-9E4C-C03A9F9D09D1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{73CA5041-3960-4366-A599-5D9EC8E646DE}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{5F85669A-2CF2-4819-980A-03FA84062CBD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "UnitTests\UnitTests.csproj", "{5F85669A-2CF2-4819-980A-03FA84062CBD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApplication1", "ConsoleApplication1\ConsoleApplication1.csproj", "{C0413BBE-C9C0-477F-A7CD-4148A326BB64}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApplication1", "ConsoleApplication1\ConsoleApplication1.csproj", "{C0413BBE-C9C0-477F-A7CD-4148A326BB64}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Shared", "Shared\Shared.shproj", "{1D42DA70-FE0E-4A4D-9D76-9F0CB475F575}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "csv", "csv\csv.csproj", "{744AC3B0-8DD8-4547-A13B-9954AEFFCC18}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Shared.BusterWood.Data", "Shared.BusterWood.Data\Shared.BusterWood.Data.shproj", "{D925AE4C-9775-4D88-9682-1E93ACEB5577}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "csv", "csv\csv.csproj", "{744AC3B0-8DD8-4547-A13B-9954AEFFCC18}"
-EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		Shared\Shared.projitems*{1d42da70-fe0e-4a4d-9d76-9f0cb475f575}*SharedItemsImports = 13
 		Shared.BusterWood.Data\Shared.BusterWood.Data.projitems*{31fbef30-81a5-4fc5-9e4c-c03a9f9d09d1}*SharedItemsImports = 4
-		Shared.BusterWood.Data\Shared.BusterWood.Data.projitems*{744ac3b0-8dd8-4547-a13b-9954aeffcc18}*SharedItemsImports = 4
-		Shared\Shared.projitems*{744ac3b0-8dd8-4547-a13b-9954aeffcc18}*SharedItemsImports = 4
 		Shared.BusterWood.Data\Shared.BusterWood.Data.projitems*{d925ae4c-9775-4d88-9682-1e93aceb5577}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

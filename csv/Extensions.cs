@@ -6,9 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace BusterWood.Data.Shared
+namespace BusterWood.Data
 {
-    static class Extensions
+    static partial class Extensions
     {
         /// <summary>Returns the value after a command line <paramref name="flag"/>, or the <paramref name="default"/> if the <paramref name="flag"/>, was not found</summary>
         /// <remarks>Removes the <paramref name="flag"/> and value from the list, if the <paramref name="flag"/> was found</remarks>
