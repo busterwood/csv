@@ -13,6 +13,7 @@
    limitations under the License. 
 */
 using System;
+using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -83,7 +84,7 @@ namespace BusterWood.Data
         ///// <summary>Returns the <see cref="ColumnValue"/> of this <see cref="Row"/> with the specified <paramref name="index"/></summary>
         //public virtual ColumnValue this[string name] => new ColumnValue(Schema[name], Get(name));
 
-        protected static T ValueOrDefault<T>(object val) => val == null && typeof(T).IsValueType ? default(T) : (T)val;
+        protected static T ValueOrDefault<T>(object val) => val == null && typeof(T).GetTypeInfo().IsValueType ? default(T) : (T)val;
 
         /// <summary>Returns the value of a <see cref="Column"/> with the specified <paramref name="name"/></summary>
         public abstract object Get(string name);

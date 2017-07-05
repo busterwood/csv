@@ -19,7 +19,7 @@ namespace BusterWood.Csv
                 DataSequence input = Args.GetDataSequence(args);
 
                 var others = args
-                    .Select(file => new { file, reader = new StreamReader(file) })
+                    .Select(file => new { file, reader = new StreamReader(new FileStream(file, FileMode.Open, FileAccess.Read)) })
                     .Select(r => r.reader.ToCsvDataSequence(r.file))
                     .ToList();
 

@@ -54,7 +54,7 @@ namespace BusterWood.Data
         public static DataSequence GetDataSequence(List<string> args)
         {
             var file = args.StringFlag("--in")                ;
-            TextReader input = file == null ? Console.In : new StreamReader(file);
+            TextReader input = file == null ? Console.In : new StreamReader(new FileStream(file, FileMode.Open, FileAccess.Read));
             return input.ToCsvDataSequence(file ?? "stdin");
         }
         
@@ -70,13 +70,13 @@ namespace BusterWood.Data
     }
 
 
-    [System.Serializable]
+    //[System.Serializable]
     class HelpException : Exception
     {
         public HelpException() { }
         public HelpException(string message) : base(message) { }
         public HelpException(string message, Exception inner) : base(message, inner) { }
-        protected HelpException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
+        //protected HelpException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
 
     static class StdErr

@@ -39,7 +39,7 @@ namespace BusterWood.Data
         public static Schema ToSchema(this Type type, string name = null)
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
-            if (type.IsPrimitive) throw new ArgumentException($"Cannot get the schema for a primative type: {type.Name}");
+            if (type.GetTypeInfo().IsPrimitive) throw new ArgumentException($"Cannot get the schema for a primative type: {type.Name}");
             var cols = ReadableMembers(type).Select(m => new Column(m.Name, MemberType(m)));
             return new Schema(name ?? type.Name, cols);
         }
@@ -73,11 +73,15 @@ namespace BusterWood.Data
 
             protected override IEnumerable<Row> GetSequence()
             {
-                if ((typeof(T).IsClass || IsNullableValueType()) && item != null)
+                if ((typeof(T).GetTypeInfo().IsClass || IsNullableValueType()) && item != null)
                     yield return new ExpressionRow<T>(Schema, item);
             }
 
-            private static bool IsNullableValueType() => typeof(T).IsValueType && typeof(T).IsConstructedGenericType && typeof(T).GetGenericTypeDefinition() == typeof(Nullable<>);
+            private static bool IsNullableValueType()
+            {
+                var t = typeof(T);
+                return t.GetTypeInfo().IsValueType && t.IsConstructedGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>);
+            }
         }
 
         class ReflectionRow<T> : Row

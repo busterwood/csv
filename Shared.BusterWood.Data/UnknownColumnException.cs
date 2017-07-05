@@ -13,11 +13,11 @@
    limitations under the License. 
 */
 using System;
-using System.Runtime.Serialization;
+//using System.Runtime.Serialization;
 
 namespace BusterWood.Data
 {
-    [Serializable]
+    //[Serializable]
     public class UnknownColumnException : Exception
     {
         public UnknownColumnException()
@@ -32,8 +32,8 @@ namespace BusterWood.Data
         {
         }
 
-        protected UnknownColumnException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
+        //protected UnknownColumnException(SerializationInfo info, StreamingContext context) : base(info, context)
+        //{
+        //}
     }
 }
