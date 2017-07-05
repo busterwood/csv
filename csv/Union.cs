@@ -15,7 +15,7 @@ namespace BusterWood.Csv
                 if (args.Remove("--help")) Help();
                 var all = args.Remove("--all");
 
-                DataSequence input = Args.GetDataSequence(args);
+                Relation input = Args.CsvRelation(args);
 
                 var others = args
                     .Select(file => new { file, reader = new StreamReader(new FileStream(file, FileMode.Open, FileAccess.Read)) })
@@ -24,7 +24,7 @@ namespace BusterWood.Csv
 
                 input.CheckSchemaCompatibility(others);
 
-                var unionOp = all ? (Func<DataSequence, DataSequence, DataSequence>)Data.Extensions.UnionAll : Data.Extensions.Union;
+                var unionOp = all ? (Func<Relation, Relation, Relation>)Data.Extensions.UnionAll : Data.Extensions.Union;
                 var result = others.Aggregate(input, (acc, o) => unionOp(acc, o));
 
                 Console.WriteLine(result.Schema.ToCsv());

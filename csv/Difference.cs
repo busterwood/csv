@@ -16,7 +16,7 @@ namespace BusterWood.Csv
                 var all = args.Remove("--all");
                 var reverse = args.Remove("--rev");
 
-                DataSequence input = Args.GetDataSequence(args);
+                Relation input = Args.CsvRelation(args);
 
                 var others = args
                     .Select(file => new { file, reader = new StreamReader(new FileStream(file, FileMode.Open, FileAccess.Read)) })
@@ -25,8 +25,8 @@ namespace BusterWood.Csv
 
                 input.CheckSchemaCompatibility(others);
 
-                var unionOp = all ? (Func<DataSequence, DataSequence, DataSequence>)Data.Extensions.DifferenceAll : Data.Extensions.Difference;
-                DataSequence result = reverse
+                var unionOp = all ? (Func<Relation, Relation, Relation>)Data.Extensions.DifferenceAll : Data.Extensions.Difference;
+                Relation result = reverse
                     ? others.Aggregate(input, (acc, o) => unionOp(o, acc)) // reverse diff
                     : others.Aggregate(input, (acc, o) => unionOp(acc, o));
 

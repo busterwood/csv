@@ -15,7 +15,7 @@ namespace BusterWood.Csv
                 var all = args.Remove("--all");
                 var invert = args.Remove("--away"); // not equals flag, invert match
                 var contains = args.Remove("--contains");
-                DataSequence csv = Args.GetDataSequence(args);
+                Relation csv = Args.CsvRelation(args);
 
                 if (args.Count % 2 != 0)
                     throw new Exception("You must supply at pairs of paremters: column value [column value...]");

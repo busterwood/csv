@@ -13,7 +13,7 @@ namespace BusterWood.Csv
             {
                 if (args.Remove("--help")) Help();
                 var all = args.Remove("--all");
-                DataSequence csv = Args.GetDataSequence(args);
+                Relation csv = Args.CsvRelation(args);
                 HashSet<string> keep = ColumnsToKeep(args, csv.Schema.Select(c => c.Name));
                 Args.CheckColumnsAreValid(args, csv.Schema);
 
@@ -34,7 +34,7 @@ namespace BusterWood.Csv
         {
             if (args.Remove("--away"))
                 // project away columns, i.e. original schema without the columns listed in args
-                return new HashSet<string>(schemaCols.Except(args, Column.NameEquality), Column.NameEquality);
+                return new HashSet<string>(schemaCols.Except(args, Data.Column.NameEquality), Data.Column.NameEquality);
             
             // args contains the columns to keep
             return new HashSet<string>(args, StringComparer.OrdinalIgnoreCase);

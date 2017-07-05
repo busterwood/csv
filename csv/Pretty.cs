@@ -16,7 +16,7 @@ namespace BusterWood.Csv
                 var all = args.Remove("--all");
                 var invert = args.Remove("--away"); // not equals flag, invert match
                 var contains = args.Remove("--contains");
-                DataList csv = Args.GetDataSequence(args).ToList();
+                MaterializedRelation csv = Args.CsvRelation(args).Materialize();
 
                 // work out maximum width of each column
                 var maxColWidths = csv.Schema.ToDictionary(

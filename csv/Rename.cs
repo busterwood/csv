@@ -13,7 +13,7 @@ namespace BusterWood.Csv
                 if (args.Remove("--help")) Help();
                 var all = args.Remove("--all");
 
-                DataSequence input = Args.GetDataSequence(args);
+                Relation input = Args.CsvRelation(args);
 
                 if (args.Count % 2 != 0)
                     throw new Exception("You must supply at pairs of paremters: old new [old new...]");
@@ -35,7 +35,7 @@ namespace BusterWood.Csv
 
         private static Dictionary<string, string> Changes(List<string> args)
         {
-            var changes = new Dictionary<string, string>(Column.NameEquality);
+            var changes = new Dictionary<string, string>(Data.Column.NameEquality);
             for (int i = 0; i < args.Count; i += 2)
                 changes.Add(args[i], args[i + 1]);
             return changes;

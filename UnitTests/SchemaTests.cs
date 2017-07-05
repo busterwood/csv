@@ -10,13 +10,13 @@ namespace UnitTests
         [Test]
         public void cannot_create_schema_with_zero_columns()
         {
-            Assert.Throws<ArgumentException>(() => new Schema("second", new Column[0]));
+            Assert.Throws<ArgumentException>(() => new Schema("second", new BusterWood.Data.Column[0]));
         }
 
         [Test]
         public void cannot_create_schema_with_duplicate_columns()
         {
-            var c1 = new Column("name", typeof(string));
+            var c1 = new BusterWood.Data.Column("name", typeof(string));
             Assert.Throws<ArgumentException>(() => new Schema("second", new[] { c1, c1 }));
         }
 

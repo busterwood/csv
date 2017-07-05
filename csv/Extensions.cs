@@ -33,7 +33,7 @@ namespace BusterWood.Data
 
         public static string Join(this IEnumerable items, string separator = ",") => string.Join(separator, items.Cast<object>());
 
-        public static void CheckSchemaCompatibility(this DataSequence input, IEnumerable<DataSequence> others)
+        public static void CheckSchemaCompatibility(this Relation input, IEnumerable<Relation> others)
         {
             var incompatible = others.Where(seq => seq.Schema != input.Schema).ToList();
             if (incompatible.Count > 0)
@@ -51,7 +51,7 @@ namespace BusterWood.Data
             return observer;
         }
 
-        public static DataSequence GetDataSequence(List<string> args)
+        public static Relation CsvRelation(List<string> args)
         {
             var file = args.StringFlag("--in")                ;
             TextReader input = file == null ? Console.In : new StreamReader(new FileStream(file, FileMode.Open, FileAccess.Read));

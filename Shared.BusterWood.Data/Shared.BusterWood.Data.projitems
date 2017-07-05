@@ -9,13 +9,18 @@
     <Import_RootNamespace>Shared.BusterWood.Data</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Column.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ClassExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CsvReaderExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataReaderExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataSequence.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DerivedRelation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MaterializedRelation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Row.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Schema.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UnknownColumnException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Value.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="$(MSBuildThisFileDirectory)TODO.txt" />

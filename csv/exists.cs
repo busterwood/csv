@@ -15,7 +15,7 @@ namespace BusterWood.Csv
                 if (args.Remove("--help")) Help();
                 var observer = Args.VerboseJoinObserver(args);
 
-                DataSequence input = Args.GetDataSequence(args);
+                Relation input = Args.CsvRelation(args);
 
                 var others = args
                     .Select(file => new { file, reader = new StreamReader(new FileStream(file, FileMode.Open, FileAccess.Read)) })

@@ -13,7 +13,7 @@ namespace BusterWood.Csv
             {
                 if (args.Remove("--help")) Help();
                 var all = args.Remove("--all");
-                DataSequence csv = Args.GetDataSequence(args);
+                Relation csv = Args.CsvRelation(args);
                 Args.CheckColumnsAreValid(args, csv.Schema);
 
                 Console.WriteLine(csv.Schema.ToCsv());

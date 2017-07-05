@@ -25,7 +25,7 @@ namespace BusterWood.Data
 
         public static string ToCsv(this Row row, char delimiter = ',') => string.Join(delimiter.ToString(), row.Select(r => r.Value));
 
-        public static DataSequence ToCsvDataSequence(this TextReader reader, string name, char delimiter = ',')
+        public static Relation ToCsvDataSequence(this TextReader reader, string name, char delimiter = ',')
         {
             var orderedColumns = ParseColumns(reader, delimiter).ToArray();
             return new CsvDataSequence(reader, orderedColumns, name, delimiter);
@@ -51,7 +51,7 @@ namespace BusterWood.Data
             return header.Select(h => new Column(h, typeof(string)));
         }
 
-        class CsvDataSequence : DataSequence
+        class CsvDataSequence : Relation
         {
             readonly TextReader reader;
             readonly char delimiter;

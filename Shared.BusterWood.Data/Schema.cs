@@ -24,7 +24,7 @@ namespace BusterWood.Data
         Schema Schema { get; }            
     }
 
-    /// <summary>The metadata for a <see cref="DataSequence"/> of <see cref="Row"/></summary>
+    /// <summary>The metadata for a <see cref="Relation"/> of <see cref="Row"/></summary>
     /// <remarks>This type is immuatable and cannot be changed (mutated)</remarks>
     public struct Schema : IReadOnlyCollection<Column>, IEquatable<Schema>
     {
@@ -37,13 +37,10 @@ namespace BusterWood.Data
 
         public Schema(string name, params Column[] columns)
         {
-            if (columns == null)
-                throw new ArgumentNullException(nameof(columns));
+            Name = name;
+            this.columns = columns ?? throw new ArgumentNullException(nameof(columns));
             if (columns.Length == 0)
                 throw new ArgumentException($"Schema '{name}' must have one or more columns");
-            
-            Name = name;
-            this.columns = columns;
 
             var temp = new HashSet<string>(Column.NameEquality);
             foreach (var c in columns)
@@ -108,38 +105,5 @@ namespace BusterWood.Data
         }
     }
 
-    /// <remarks>This type is immutable and cannot be changed (mutated)</remarks>
-    public struct Column : IEquatable<Column>
-    {
-        internal static readonly IEqualityComparer<string> NameEquality = StringComparer.OrdinalIgnoreCase;
 
-        public Column(string name, Type type)
-        {
-            if (name == null) throw new ArgumentNullException(nameof(name));
-            if (type == null) throw new ArgumentNullException(nameof(type));
-            Name = name;
-            Type = type;
-        }
-
-        /// <summary>Name of this column</summary>
-        public string Name { get; }
-
-        /// <summary>the <see cref="System.Type"/> of this column</summary>
-        public Type Type { get; }
-
-        public bool NameEquals(string name) => NameEquality.Equals(Name, name);
-        public bool Equals(Column other) => NameEquals(other.Name) && Type == other.Type;
-        public override bool Equals(object obj) => obj is Column && Equals((Column)obj);
-        public override int GetHashCode() => NameHashCode() + (Type?.GetHashCode() ?? 0);
-        int NameHashCode() => Name == null ? 0 : NameEquality.GetHashCode(Name);
-        public override string ToString() => Name;
-
-        public static bool operator ==(Column left, Column right) => left.Equals(right);
-        public static bool operator !=(Column left, Column right) => !left.Equals(right);
-    }
-
-    public static partial class Extensions
-    {
-        public static ColumnValue Value(this Column column, object val) => new ColumnValue(column, val);
-    }
 }

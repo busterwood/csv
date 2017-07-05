@@ -21,7 +21,7 @@ namespace BusterWood.Data
 {
     public static class DataReaderExtensions
     {
-        public static DataSequence ToDataSequence(this IDataReader reader, string name)
+        public static Relation ToDataSequence(this IDataReader reader, string name)
         {
             if (reader == null) throw new ArgumentNullException(nameof(reader));
             var cols = Columns(reader).ToArray();
@@ -37,7 +37,7 @@ namespace BusterWood.Data
 
         static IEnumerable<Column> Columns(IDataReader reader) => Enumerable.Range(0, reader.FieldCount).Select(i => new Column(reader.GetName(i), reader.GetFieldType(i)));
 
-        class DbDataSequence : DataSequence
+        class DbDataSequence : Relation
         {
             readonly IDataReader reader;
             readonly Column[] columns;

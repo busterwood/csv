@@ -22,13 +22,13 @@ namespace BusterWood.Data
 {
     public static class Objects
     {
-        public static DataSequence ToDataSequence<T>(this IEnumerable<T> items, string name = null)
+        public static Relation ToDataSequence<T>(this IEnumerable<T> items, string name = null)
         {
             var schema = ToSchema<T>(name);
             return new ObjectSequence<T>(schema, items);
         }
     
-        public static DataSequence ToDataSequence<T>(T item, string name = null)
+        public static Relation ToDataSequence<T>(T item, string name = null)
         {
             var schema = ToSchema<T>(name);
             return new SingleObjectSequence<T>(schema, item);
@@ -48,7 +48,7 @@ namespace BusterWood.Data
 
         static Type MemberType(MemberInfo m) => m is PropertyInfo ? ((PropertyInfo)m).PropertyType : ((FieldInfo)m).FieldType;
 
-        class ObjectSequence<T> : DataSequence
+        class ObjectSequence<T> : Relation
         {
             readonly IEnumerable<T> items;
 
@@ -61,7 +61,7 @@ namespace BusterWood.Data
             protected override IEnumerable<Row> GetSequence() => items.Select(item => new ExpressionRow<T>(Schema, item));
         }
 
-        class SingleObjectSequence<T> : DataSequence
+        class SingleObjectSequence<T> : Relation
         {
             readonly T item;
 
