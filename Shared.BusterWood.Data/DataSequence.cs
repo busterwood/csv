@@ -21,7 +21,7 @@ using System.Linq;
 namespace BusterWood.Data
 {
     /// <summary>A sequenece of UNIQUE rows which all have the same <see cref="Schema"/></summary>
-    /// <remarks>See <see cref="CsvReaderExtensions.ToCsvDataSequence(System.IO.TextReader, string, char)"/> and <see cref="DataReaderExtensions.ToDataSequence(System.Data.IDataReader, string)"/></remarks>
+    /// <remarks>See <see cref="CsvReaderExtensions.CsvToRelation(System.IO.TextReader, string, char)"/> and <see cref="DataReaderExtensions.ToRelation(System.Data.IDataReader, string)"/></remarks>
     public abstract class Relation : IEnumerable<Row>, ISchemaed
     {
         protected Relation(Schema schema)

@@ -20,7 +20,7 @@ namespace BusterWood.Csv
 
                 var others = args
                     .Select(file => new { file, reader = new StreamReader(new FileStream(file, FileMode.Open, FileAccess.Read)) })
-                    .Select(r => r.reader.ToCsvDataSequence(r.file))
+                    .Select(r => r.reader.CsvToRelation(r.file))
                     .ToList();
 
                 input.CheckSchemaCompatibility(others);

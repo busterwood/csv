@@ -89,7 +89,6 @@ namespace BusterWood.Data
             var col = new Column(columnName, typeof(T));
             var copy = rel.Schema.Concat(Enumerable.Repeat(col, 1)).ToArray();
             var newSchema = new Schema("", copy);
-            var existing = rel.Schema.columns;
             var newRows = rel.Select(r => new ExtendedTuple(newSchema, r, new ColumnValue(col, func(r))));
             return new DerivedRelation(newSchema, newRows);
         }

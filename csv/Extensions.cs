@@ -55,7 +55,7 @@ namespace BusterWood.Data
         {
             var file = args.StringFlag("--in")                ;
             TextReader input = file == null ? Console.In : new StreamReader(new FileStream(file, FileMode.Open, FileAccess.Read));
-            return input.ToCsvDataSequence(file ?? "stdin");
+            return input.CsvToRelation(file ?? "stdin");
         }
         
         public static void CheckColumnsAreValid(IEnumerable<string> args, Schema schema)

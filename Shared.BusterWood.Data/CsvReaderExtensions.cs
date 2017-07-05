@@ -25,21 +25,12 @@ namespace BusterWood.Data
 
         public static string ToCsv(this Row row, char delimiter = ',') => string.Join(delimiter.ToString(), row.Select(r => r.Value));
 
-        public static Relation ToCsvDataSequence(this TextReader reader, string name, char delimiter = ',')
-        {
-            var orderedColumns = ParseColumns(reader, delimiter).ToArray();
-            return new CsvDataSequence(reader, orderedColumns, name, delimiter);
-        }
-
-        public static Schema ToSchema(this TextReader reader, string name, char delimiter)
+        public static Relation CsvToRelation(this TextReader reader, string relationName, char delimiter=',')
         {
             if (reader == null) throw new ArgumentNullException(nameof(reader));
-            return ToSchema(reader.ReadLine(), name, delimiter);
+            var orderedColumns = ParseColumns(reader.ReadLine(), delimiter).ToArray();
+            return new CsvRelation(reader, orderedColumns, relationName, delimiter);
         }
-
-        static Schema ToSchema(string headerLine, string name, char delimiter) => new Schema(name, ParseColumns(headerLine, delimiter));
-
-        static IEnumerable<Column> ParseColumns(TextReader reader, char delimiter) => ParseColumns(reader.ReadLine(), delimiter);
 
         static IEnumerable<Column> ParseColumns(string headerLine, char delimiter)
         {
@@ -51,19 +42,18 @@ namespace BusterWood.Data
             return header.Select(h => new Column(h, typeof(string)));
         }
 
-        class CsvDataSequence : Relation
+        class CsvRelation : Relation
         {
             readonly TextReader reader;
             readonly char delimiter;
             readonly Column[] columns;
 
-            public CsvDataSequence(TextReader reader, Column[] columns, string schemaName, char delimiter) : base(new Schema(schemaName, columns))
+            public CsvRelation(TextReader reader, Column[] columns, string schemaName, char delimiter) : base(new Schema(schemaName, columns))
             {
                 this.columns = columns;
                 this.reader = reader;
                 this.delimiter = delimiter;
             }
-
 
             protected override IEnumerable<Row> GetSequence()
             {
@@ -89,7 +79,6 @@ namespace BusterWood.Data
                 return values.Concat(Enumerable.Repeat("", Schema.Count - values.Length)).ToArray(); // some missing data, report this via event?
             }
         }
-
 
     }
 }

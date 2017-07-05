@@ -21,12 +21,12 @@ namespace BusterWood.Data
 {
     public static class DataReaderExtensions
     {
-        public static Relation ToDataSequence(this IDataReader reader, string name)
+        public static Relation ToRelation(this IDataReader reader, string name)
         {
             if (reader == null) throw new ArgumentNullException(nameof(reader));
             var cols = Columns(reader).ToArray();
             var schema = new Schema(name, cols);
-            return new DbDataSequence(reader, cols, schema);
+            return new DbRelation(reader, cols, schema);
         }
 
         public static Schema ToSchema(this IDataReader reader, string name)
@@ -37,12 +37,12 @@ namespace BusterWood.Data
 
         static IEnumerable<Column> Columns(IDataReader reader) => Enumerable.Range(0, reader.FieldCount).Select(i => new Column(reader.GetName(i), reader.GetFieldType(i)));
 
-        class DbDataSequence : Relation
+        class DbRelation : Relation
         {
             readonly IDataReader reader;
             readonly Column[] columns;
 
-            public DbDataSequence(IDataReader reader, Column[] columns, Schema schema) : base(schema)
+            public DbRelation(IDataReader reader, Column[] columns, Schema schema) : base(schema)
             {
                 this.reader = reader;
                 this.columns = columns;

@@ -28,7 +28,7 @@ namespace BusterWood.Data
     /// <remarks>This type is immuatable and cannot be changed (mutated)</remarks>
     public struct Schema : IReadOnlyCollection<Column>, IEquatable<Schema>
     {
-        internal readonly Column[] columns;
+        readonly Column[] columns;
         readonly int hashCode;
 
         public Schema(string name, IEnumerable<Column> columns) : this(name, columns?.ToArray())
@@ -39,9 +39,7 @@ namespace BusterWood.Data
         {
             Name = name;
             this.columns = columns ?? throw new ArgumentNullException(nameof(columns));
-
             CheckForDuplicateColumns(columns);
-
             hashCode = columns.Aggregate(0, (hc, c) => { unchecked { return hc + c.GetHashCode(); } });
         }
 
@@ -50,9 +48,8 @@ namespace BusterWood.Data
             var temp = new HashSet<string>(Column.NameEquality);
             foreach (var c in columns)
             {
-                if (temp.Contains(c.Name))
+                if (!temp.Add(c.Name))
                     throw new ArgumentException($"Schema must have unqiue columns: {c} is duplicated");
-                temp.Add(c.Name);
             }
         }
 
