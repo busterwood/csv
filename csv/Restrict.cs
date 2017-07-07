@@ -15,20 +15,19 @@ namespace BusterWood.Csv
                 var all = args.Remove("--all");
                 var invert = args.Remove("--away"); // not equals flag, invert match
                 var contains = args.Remove("--contains");
-                Relation csv = Args.CsvRelation(args);
 
                 if (args.Count % 2 != 0)
                     throw new Exception("You must supply at pairs of paremters: column value [column value...]");
 
-                Args.CheckColumnsAreValid(args.Where((a, i) => i % 2 == 0), csv.Schema);
+                Args.CheckColumnsAreValid(args.Where((a, i) => i % 2 == 0), input.Schema);
 
-                Console.WriteLine(csv.Schema.ToCsv());
+                Console.WriteLine(input.Schema.ToCsv());
 
                 Func<Row, bool> predicate = contains ? ContainsPredicate(args) : EqualPredicate(args);
                 if (all)
-                    return invert ? csv.RestrictAwayAll(predicate) : csv.RestrictAll(predicate);
+                    return invert ? input.RestrictAwayAll(predicate) : input.RestrictAll(predicate);
                 else
-                    return invert ? csv.RestrictAway(predicate) : csv.Restrict(predicate);
+                    return invert ? input.RestrictAway(predicate) : input.Restrict(predicate);
             }
             catch (Exception ex)
             {
