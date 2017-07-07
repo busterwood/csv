@@ -6,30 +6,25 @@ namespace BusterWood.Csv
 {
     class Rename
     {
-        public static void Run(List<string> args)
+        public static Relation Run(List<string> args, Relation input)
         {
             try
             {
                 if (args.Remove("--help")) Help();
                 var all = args.Remove("--all");
 
-                Relation input = Args.CsvRelation(args);
-
                 if (args.Count % 2 != 0)
                     throw new Exception("You must supply at pairs of paremters: old new [old new...]");
 
                 var changes = Changes(args);
 
-                var result = all ? input.RenameAll(changes) : input.Rename(changes);
-
-                Console.WriteLine(result.Schema.ToCsv());
-                foreach (var row in result)
-                    Console.WriteLine(row.ToCsv());
+                return all ? input.RenameAll(changes) : input.Rename(changes);
             }
             catch (Exception ex)
             {
                 StdErr.Warning(ex.Message);
                 Help();
+                return null;
             }
         }
 

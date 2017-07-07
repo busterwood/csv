@@ -7,24 +7,22 @@ namespace BusterWood.Csv
 {
     class OrderBy
     {
-        public static void Run(List<string> args)
+        public static Relation Run(List<string> args, Relation input)
         {
             try
             {
                 if (args.Remove("--help")) Help();
                 var all = args.Remove("--all");
-                Relation csv = Args.CsvRelation(args);
-                Args.CheckColumnsAreValid(args, csv.Schema);
+                Args.CheckColumnsAreValid(args, input.Schema);
 
-                Console.WriteLine(csv.Schema.ToCsv());
-                IOrderedEnumerable<Row> result = SortRows(args, csv.Distinct(!all));
-                foreach (var row in result)
-                    Console.WriteLine(row.ToCsv());
+                IOrderedEnumerable<Row> sortedRows = SortRows(args, input.Distinct(!all));
+                return new DerivedRelation(input.Schema, sortedRows);
             }
             catch (Exception ex)
             {
                 StdErr.Warning(ex.Message);
                 Help();
+                return null;
             }
         }
 

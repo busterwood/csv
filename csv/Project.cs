@@ -7,26 +7,22 @@ namespace BusterWood.Csv
 {
     class Project
     {
-        public static void Run(List<string> args)
+        public static Relation Run(List<string> args, Relation input)
         {
             try
             {
                 if (args.Remove("--help")) Help();
                 var all = args.Remove("--all");
-                Relation csv = Args.CsvRelation(args);
-                HashSet<string> keep = ColumnsToKeep(args, csv.Schema.Select(c => c.Name));
-                Args.CheckColumnsAreValid(args, csv.Schema);
+                HashSet<string> keep = ColumnsToKeep(args, input.Schema.Select(c => c.Name));
+                Args.CheckColumnsAreValid(args, input.Schema);
 
-                var result = csv.Project(keep);
-                Console.WriteLine(result.Schema.ToCsv());
-                var lines = result.Distinct(!all).Select(row => row.ToCsv()).Where(line => line.Length > 0);
-                foreach (var l in lines)
-                    Console.WriteLine(l);
+                return all ? input.ProjectAll(keep) : input.Project(keep); 
             }
             catch (Exception ex)
             {
                 StdErr.Warning(ex.Message);
                 Help();
+                return null;
             }
         }
 

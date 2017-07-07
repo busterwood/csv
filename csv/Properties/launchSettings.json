@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "csv": {
+      "commandName": "Project",
+      "commandLineArgs": "--in sample2.csv diff sample1.csv project Quantity pretty"
+    }
+  }
+}

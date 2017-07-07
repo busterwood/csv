@@ -67,6 +67,24 @@ namespace BusterWood.Data
             if (invalidArgs.Count > 0)
                 StdErr.Info("One or more columns do not exist: " + invalidArgs.Join());
         }
+
+        public static IEnumerable<IEnumerable<T>> SplitOn<T>(this IEnumerable<T> input, Func<T, bool> predicate)
+        {
+            var temp = new List<T>();
+            foreach (var item in input)
+            {
+                if (temp.Count > 0 && predicate(item))
+                {
+                    yield return temp.ToArray();
+                    temp.Clear();
+                }
+                temp.Add(item);
+            }
+            if (temp.Count > 0)
+            {
+                yield return temp.ToArray();
+            }
+        }
     }
 
 

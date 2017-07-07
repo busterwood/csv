@@ -8,30 +8,24 @@ namespace BusterWood.Csv
 {
     class Exists
     {
-        public static void Run(List<string> args)
+        public static Relation Run(List<string> args, Relation input)
         {
             try
             {
                 if (args.Remove("--help")) Help();
                 var observer = Args.VerboseJoinObserver(args);
-
-                Relation input = Args.CsvRelation(args);
-
                 var others = args
                     .Select(file => new { file, reader = new StreamReader(new FileStream(file, FileMode.Open, FileAccess.Read)) })
                     .Select(r => r.reader.CsvToRelation(r.file))
                     .ToList();
 
-                var result = others.Aggregate(input, (left, right) => left.SemiJoin(right, observer));
-
-                Console.WriteLine(result.Schema.ToCsv());
-                foreach (var row in result)
-                    Console.WriteLine(row.ToCsv());
+                return others.Aggregate(input, (left, right) => left.SemiJoin(right, observer));
             }
             catch (Exception ex)
             {
                 StdErr.Warning(ex.Message);
                 Help();
+                return null;
             }
         }
 

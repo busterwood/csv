@@ -7,7 +7,7 @@ namespace BusterWood.Csv
 {
     class Restrict
     {
-        public static void Run(List<string> args)
+        public static Relation Run(List<string> args, Relation input)
         {
             try
             {
@@ -25,14 +25,16 @@ namespace BusterWood.Csv
                 Console.WriteLine(csv.Schema.ToCsv());
 
                 Func<Row, bool> predicate = contains ? ContainsPredicate(args) : EqualPredicate(args);
-                var result = invert ? csv.RestrictAway(predicate) : csv.Restrict(predicate);
-                foreach (var row in result.Distinct(!all))
-                    Console.WriteLine(row.ToCsv());
+                if (all)
+                    return invert ? csv.RestrictAwayAll(predicate) : csv.RestrictAll(predicate);
+                else
+                    return invert ? csv.RestrictAway(predicate) : csv.Restrict(predicate);
             }
             catch (Exception ex)
             {
                 StdErr.Warning(ex.Message);
                 Help();
+                return null;
             }
         }
 

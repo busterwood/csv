@@ -8,14 +8,12 @@ namespace BusterWood.Csv
 {
     class Union
     {
-        public static void Run(List<string> args)
+        public static Relation Run(List<string> args, Relation input)
         {
             try
             {
                 if (args.Remove("--help")) Help();
                 var all = args.Remove("--all");
-
-                Relation input = Args.CsvRelation(args);
 
                 var others = args
                     .Select(file => new { file, reader = new StreamReader(new FileStream(file, FileMode.Open, FileAccess.Read)) })
@@ -25,16 +23,13 @@ namespace BusterWood.Csv
                 input.CheckSchemaCompatibility(others);
 
                 var unionOp = all ? (Func<Relation, Relation, Relation>)Data.Extensions.UnionAll : Data.Extensions.Union;
-                var result = others.Aggregate(input, (acc, o) => unionOp(acc, o));
-
-                Console.WriteLine(result.Schema.ToCsv());
-                foreach (var row in result)
-                    Console.WriteLine(row.ToCsv());
+                return others.Aggregate(input, (acc, o) => unionOp(acc, o));
             }
             catch (Exception ex)
             {
                 StdErr.Warning(ex.Message);
                 Help();
+                return null;
             }
         }
 

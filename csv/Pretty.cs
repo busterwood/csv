@@ -8,7 +8,7 @@ namespace BusterWood.Csv
 {
     class PrettyPrint
     {
-        public static void Run(List<string> args)
+        public static Relation Run(List<string> args, Relation input)
         {
             try
             {
@@ -16,7 +16,7 @@ namespace BusterWood.Csv
                 var all = args.Remove("--all");
                 var invert = args.Remove("--away"); // not equals flag, invert match
                 var contains = args.Remove("--contains");
-                MaterializedRelation csv = Args.CsvRelation(args).Materialize();
+                MaterializedRelation csv = input.Materialize();
 
                 // work out maximum width of each column
                 var maxColWidths = csv.Schema.ToDictionary(
@@ -36,6 +36,7 @@ namespace BusterWood.Csv
                 StdErr.Warning(ex.Message);
                 Help();
             }
+            return null; // should not be used as input
         }
 
         private static string Format(StringBuilder sb, Schema schema, Dictionary<string, int> colWidths)

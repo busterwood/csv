@@ -39,6 +39,8 @@ namespace BusterWood.Data
         public decimal Decimal(string name) => ValueOrDefault<decimal>(Get(name));
         public bool Bool(string name) => ValueOrDefault<bool>(Get(name));
         public DateTime DateTime(string name) => ValueOrDefault<DateTime>(Get(name));
+        public DateTimeOffset DateTimeOffset(string name) => ValueOrDefault<DateTimeOffset>(Get(name));
+        public Relation Relation(string name) => ValueOrDefault<Relation>(Get(name));
 
         /// <summary>Returns a sequnce of values for each <see cref="Column"/> in the <see cref="Schema"/></summary>
         public virtual IEnumerator<ColumnValue> GetEnumerator() => Schema.Select(col => new ColumnValue(col, Get(col.Name))).GetEnumerator();

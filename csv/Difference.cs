@@ -8,15 +8,13 @@ namespace BusterWood.Csv
 {
     class Difference
     {
-        public static void Run(List<string> args)
+        public static Relation Run(List<string> args, Relation input)
         {
             try
             {
                 if (args.Remove("--help")) Help();
                 var all = args.Remove("--all");
                 var reverse = args.Remove("--rev");
-
-                Relation input = Args.CsvRelation(args);
 
                 var others = args
                     .Select(file => new { file, reader = new StreamReader(new FileStream(file, FileMode.Open, FileAccess.Read)) })
@@ -30,14 +28,13 @@ namespace BusterWood.Csv
                     ? others.Aggregate(input, (acc, o) => unionOp(o, acc)) // reverse diff
                     : others.Aggregate(input, (acc, o) => unionOp(acc, o));
 
-                Console.WriteLine(result.Schema.ToCsv());
-                foreach (var row in result)
-                    Console.WriteLine(row.ToCsv());
+                return result;
             }
             catch (Exception ex)
             {
                 StdErr.Warning(ex.Message);
                 Help();
+                return null;
             }
         }
 

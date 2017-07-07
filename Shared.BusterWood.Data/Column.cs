@@ -8,12 +8,16 @@ namespace BusterWood.Data
     public struct Column : IEquatable<Column>
     {
         internal static readonly IEqualityComparer<string> NameEquality = StringComparer.OrdinalIgnoreCase;
+        static readonly Type[] allowedTypes = { typeof(String), typeof(int), typeof(long), typeof(bool), typeof(double), typeof(decimal), typeof(DateTimeOffset), typeof(Schema), typeof(short) };
 
         public Column(string name, Type type)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Type = type ?? throw new ArgumentNullException(nameof(type));
+            if (!IsAllowed(type)) throw new ArgumentOutOfRangeException(nameof(type), type, $"Not allowed");
         }
+
+        public static bool IsAllowed(Type type) => Array.IndexOf(allowedTypes, type) >= 0;
 
         /// <summary>Name of this column</summary>
         public string Name { get; }
@@ -24,14 +28,11 @@ namespace BusterWood.Data
         public bool NameEquals(string name) => NameEquality.Equals(Name, name);
         public bool Equals(Column other) => NameEquals(other.Name) && Type == other.Type;
         public override bool Equals(object obj) => obj is Column && Equals((Column)obj);
-        public override int GetHashCode() => NameHashCode() + (Type?.GetHashCode() ?? 0);
-        int NameHashCode() => Name == null ? 0 : NameEquality.GetHashCode(Name);
+        public override int GetHashCode() => (Name?.GetHashCode() ?? 0) ^ (Type?.GetHashCode() ?? 0);
         public override string ToString() => Name;
-
         public static bool operator ==(Column left, Column right) => left.Equals(right);
         public static bool operator !=(Column left, Column right) => !left.Equals(right);
     }
-
 
     public static partial class Extensions
     {

@@ -39,10 +39,26 @@ namespace BusterWood.Data
         public static Relation Distinct(this Relation rel, bool enabled) => enabled ? Distinct(rel) : rel;
 
         /// <summary>Filter the source releation, e.g. a "Where" clause</summary>
-        public static Relation Restrict(this Relation rel, Func<Row, bool> predicate) => new DerivedRelation(rel.Schema, Enumerable.Where(rel, predicate));
+        public static Relation RestrictAll(this Relation rel, Func<Row, bool> predicate) => new DerivedRelation(rel.Schema, Enumerable.Where(rel, predicate));
 
         /// <summary>Filter the source releation, e.g. a "Where" clause</summary>
-        public static Relation RestrictAway(this Relation rel, Func<Row, bool> predicate) => new DerivedRelation(rel.Schema, Enumerable.Where(rel, row => !predicate(row)));
+        public static Relation RestrictAwayAll(this Relation rel, Func<Row, bool> predicate) => new DerivedRelation(rel.Schema, Enumerable.Where(rel, row => !predicate(row)));
+
+        /// <summary>Filter the source releation, e.g. a "Where" clause</summary>
+        public static Relation Restrict(this Relation rel, Func<Row, bool> predicate) => new DerivedRelation(rel.Schema, Enumerable.Where(rel, predicate).Distinct());
+
+        /// <summary>Filter the source releation, e.g. a "Where" clause</summary>
+        public static Relation RestrictAway(this Relation rel, Func<Row, bool> predicate) => new DerivedRelation(rel.Schema, Enumerable.Where(rel, row => !predicate(row)).Distinct());
+
+        /// <summary>Returns a new sequence with that only contains the requested <paramref name="columns"/> from the source <paramref name="rel"/></summary>
+        /// <remarks>Duplicates are removed from the resulting sequence</remarks>
+        public static Relation ProjectAll(this Relation rel, IEnumerable<string> columns)
+        {
+            var cols = columns.Select(c => rel.Schema[c]);
+            var newSchema = new Schema("", cols);
+            var newRows = rel.Select(r => new ProjectedTuple(newSchema, r));
+            return new DerivedRelation(newSchema, newRows);
+        }
 
         /// <summary>Returns a new sequence with that only contains the requested <paramref name="columns"/> from the source <paramref name="rel"/></summary>
         /// <remarks>Duplicates are removed from the resulting sequence</remarks>
@@ -51,7 +67,7 @@ namespace BusterWood.Data
             var cols = columns.Select(c => rel.Schema[c]);
             var newSchema = new Schema("", cols);
             var newRows = rel.Select(r => new ProjectedTuple(newSchema, r));
-            return new DerivedRelation(newSchema, newRows);
+            return new DerivedRelation(newSchema, newRows.Distinct());
         }
 
         /// <summary>Returns a new sequence with that only contains the requested <paramref name="columns"/> from the source <paramref name="rel"/></summary>
