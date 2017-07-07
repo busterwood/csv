@@ -93,7 +93,7 @@ namespace BusterWood.Csv
 
         static void Help()
         {
-            Console.Error.WriteLine($"csv command [--help] [--in file] [args...]");
+            Console.Error.WriteLine($"csv [--help] [--in file] command [args...] [command args...]");
             Console.Error.WriteLine($"Reads CSV from StdIn or the --in file and outputs CSV.");
             Console.Error.WriteLine($"Command must be one of the following:");
             Console.Error.WriteLine($"\tdiff[erence]    set difference between the input and other file(s)");
