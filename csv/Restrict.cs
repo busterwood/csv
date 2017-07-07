@@ -21,8 +21,6 @@ namespace BusterWood.Csv
 
                 Args.CheckColumnsAreValid(args.Where((a, i) => i % 2 == 0), input.Schema);
 
-                Console.WriteLine(input.Schema.ToCsv());
-
                 Func<Row, bool> predicate = contains ? ContainsPredicate(args) : EqualPredicate(args);
                 if (all)
                     return invert ? input.RestrictAwayAll(predicate) : input.RestrictAll(predicate);
