@@ -20,6 +20,8 @@ namespace BusterWood.Csv
             "select",
             "rename",
             "restrict",
+            "tojson",
+            "toxml",
             "where",
             "union",
         };
@@ -84,6 +86,10 @@ namespace BusterWood.Csv
                 case "restrict":
                 case "where":
                     return Restrict.Run(args, input);
+                case "tojson":
+                    return ToJson.Run(args, input);
+                case "toxml":
+                    return ToXml.Run(args, input);
                 case "union":
                     return Union.Run(args, input);
                 default:
@@ -100,12 +106,15 @@ namespace BusterWood.Csv
             Console.Error.WriteLine($"\tsemijoin|exists rows from input where a matching row exists in other file(s)");
             Console.Error.WriteLine($"\tintersect       set intersection between the input and other file(s)");
             Console.Error.WriteLine($"\tjoin            natural join of the input and other file(s)");
-            Console.Error.WriteLine($"\torderby         sorts the input by one or more columns");
-            Console.Error.WriteLine($"\tpretty          formats the input CSV in aligned columns");
             Console.Error.WriteLine($"\tproject|select  removes columns from the input");
             Console.Error.WriteLine($"\trename          changes some of the input column names");
             Console.Error.WriteLine($"\trestrict|where  removes rows from the input");
             Console.Error.WriteLine($"\tunion           set union between the input and other file(s)");
+            Console.Error.WriteLine($"Non-relational commands are:");
+            Console.Error.WriteLine($"\torderby         sorts the input by one or more columns");
+            Console.Error.WriteLine($"\tpretty          formats the input CSV in aligned columns");
+            Console.Error.WriteLine($"\ttojson          outputs JSON array for the input CSV, one object per row");
+            Console.Error.WriteLine($"\ttoxml           outputs XML for the input CSV, one element per row");
             Programs.Exit(1);
         }
 

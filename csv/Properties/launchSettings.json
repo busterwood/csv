@@ -2,7 +2,7 @@
   "profiles": {
     "csv": {
       "commandName": "Project",
-      "commandLineArgs": "--in sample2.csv diff sample1.csv project Quantity pretty"
+      "commandLineArgs": "--in sample1.csv toxml"
     }
   }
 }
