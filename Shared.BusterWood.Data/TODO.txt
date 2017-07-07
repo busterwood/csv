@@ -2,9 +2,6 @@
 ====
 
 * Add method to create a schema from an existing schema with some additions?
-* Add a calculated column to a sequence
-* Schema column order remapping - including DataSequence
-* Schema sub selection (less columns) - including DataSequence
 * Row to object via CTOR
 * Row to object via properties (and fields)
 * IDictionary to Row (with known schema)
@@ -34,3 +31,6 @@ Done
 * Schema equality
 * Merge two schemas
 * Row equality
+* Schema column order remapping - done with Project extension method
+* Schema sub selection (less columns) - done with Project extension method
+* Add a calculated column to a sequence - Extend extension method

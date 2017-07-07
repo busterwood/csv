@@ -23,6 +23,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Value.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="$(MSBuildThisFileDirectory)TODO.txt" />
+    <None Include="$(MSBuildThisFileDirectory)TODO.txt" />
   </ItemGroup>
 </Project>

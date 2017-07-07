@@ -44,7 +44,7 @@ namespace BusterWood.Data
             return new Schema(name ?? type.Name, cols);
         }
 
-        internal static MemberInfo[] ReadableMembers(Type type) => type.GetProperties().Where(p => p.CanRead).Concat<MemberInfo>(type.GetFields()).ToArray();
+        internal static MemberInfo[] ReadableMembers(Type type) => type.GetTypeInfo().GetProperties().Where(p => p.CanRead).Concat<MemberInfo>(type.GetTypeInfo().GetFields()).ToArray();
 
         static Type MemberType(MemberInfo m) => m is PropertyInfo ? ((PropertyInfo)m).PropertyType : ((FieldInfo)m).FieldType;
 

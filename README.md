@@ -19,102 +19,40 @@ A schema should also support:
 `csv.exe` is a command line tool for performing [Relational Algebra](https://en.wikipedia.org/wiki/Relational_algebra) on CSV files, written on the .NET platform.
 
 ```
-csv command [--help] [--in file] [args...]
+csv [--help] [--in file] command [args...] [command args...]
 Reads CSV from StdIn or the --in file and outputs CSV.
 Command must be one of the following:
         diff[erence]    set difference between the input and other file(s)
         semijoin|exists rows from input where a matching row exists in other file(s)
         intersect       set intersection between the input and other file(s)
         join            natural join of the input and other file(s)
-        orderby         sorts the input by one or more columns
         project|select  removes columns from the input
         rename          changes some of the input column names
         restrict|where  removes rows from the input
         union           set union between the input and other file(s)
+Non-relational commands are:
+        orderby         sorts the input by one or more columns
+        pretty          formats the input CSV in aligned columns
+        tojson          outputs JSON array for the input CSV, one object per row
+        toxml           outputs XML for the input CSV, one element per row
 ```
 
-The tools only support CSV at the moment, but will be extened to support JSON and XML.
+The tools only supports reading CSV at the moment, but will be extened to support reading JSON and XML.
 
-## csv.exe difference
+## Examples
 
+Join (cat) together multiple CSV files, removing the header lines of all but the first file.  All files must have the same set of columns, but column order does not matter.
+Note that duplicate rows will be removed from the result.
 ```
-c:\Dev\BusterWood.Data>csv diff --help
-csv diff[erence] [--all] [--in file] [--rev] [file ...]
-Outputs the rows in the input CSV that do not appear in any of the additional files
-        --all    do NOT remove duplicates from the result
-        --in     read the input from a file path (rather than standard input)
-        --rev    reverse the difference
+csv < file1.csv union file2.csv file3.csv
 ```
 
-## csv.exe semijoin (exists)
-
+Select only the rows from an input file where the `service` column equals `123`
 ```
-csv exists [--in file] [file ...]
-Outputs the input CSV where only if a row exists in the additional input files with matching values in common columns.
-        --in     read the input from a file path (rather than standard input)
+csv < file1.csv restrict service 123
 ```
 
-## csv.exe intersect
-
+Multiple commands can be combined, for example, combining the first two examples, sorting the result and outputting JSON:
 ```
-csv intersect [--all] [--in file] [file ...]
-Outputs the set intersection of the input CSV and some additional files
-        --all    do NOT remove duplicates from the result
-        --in     read the input from a file path (rather than standard input)
-```
-
-## csv.exe join
-
-```
-csv join [--in file] [file ...]
-Outputs the natural join of the input CSV and some additional files based on common columns
-        --in     read the input from a file path (rather than standard input)
-```
-
-## csv.exe orderby
-
-```
-csv orderby [--all] [--in file] Column [Column ...]
-Sorts the input CSV by one or more columns
-        --all  do NOT remove duplicates from the result
-        --in   read the input from a file path (rather than standard input)
-```
-
-## csv.exe project (select)
-
-```
-csv project [--all] [--in file] [--away] Column [Column ...]
-Outputs in the input CSV with only the specified columns
-        --all   do NOT remove duplicates from the result
-        --in    read the input from a file path (rather than standard input)
-        --away  removes the input columns from the source
-```
-
-## csv.exe rename
-
-```
-csv rename [--in file] [old new...]
-Outputs the input CSV chaning the name of one or more columns.
-        --all    do NOT remove duplicates from the result
-        --in     read the input from a file path (rather than standard input)
-```
-
-## csv.exe restrict
-
-```
-csv restrict [--all] [--in file] [--away] [--equal] Column Value [Column Value ...]
-Outputs rows of the input CSV where Column equals the string Value.  Multiple tests are supported.
-        --all       do NOT remove duplicates from the result
-        --in        read the input from a file path (rather than standard input)
-        --away      removes rows from the input that match the test(s)
-        --contains  changes the test to be Column contains Value, rather that equality
-```
-
-## csv.exe union
-
-```
-csv union [--all] [--in file] [file ...]
-Outputs the set union of the input CSV and some additional files
-        --all    do NOT remove duplicates from the result
-        --in     read the input from a file path (rather than standard input)
+csv < file1.csv UNION file2.csv file3.csv RESTRICT service 123 ORDERBY service TOJSON
 ```
