@@ -16,6 +16,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)DataSequence.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DerivedRelation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)JsonReader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MaterializedRelation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Row.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Schema.cs" />
