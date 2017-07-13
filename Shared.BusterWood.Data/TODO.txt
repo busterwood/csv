@@ -1,7 +1,11 @@
 ﻿TODO
 ====
 
-* Add method to create a schema from an existing schema with some additions?
+* Read 2D JSON data
+* Read 2D XML data
+* N-demensional relations
+* Read N-dimensional JSON
+* Read N-dimensional XML
 * Row to object via CTOR
 * Row to object via properties (and fields)
 * IDictionary to Row (with known schema)
@@ -13,8 +17,6 @@
 * DataSequence to IEnumerable<SqlDataRecord>
 * DbDataReader to IEnumerable<DataSequence> for commands returning multiple result sets
 * Column storage for a list?  e.g. each column has a typed backing T[] of values
-* XmlDataSequence?
-* JsonDataSequence?
 * DataTable to DataSequence?
 * DataSequence to DataTable?
 * Schema to CREATE TABLE statement (keys?)
