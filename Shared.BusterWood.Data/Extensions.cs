@@ -121,10 +121,24 @@ namespace BusterWood.Data
                 throw new ArgumentException($"Schemas '{rel.Schema}' and '{other.Schema}' are incompatible");
         }
 
+        /// <summary>
+        /// Rows from <paramref name="rel"/> that do not exist in <paramref name="other"/>
+        /// </summary>
         public static Relation Difference(this Relation rel, Relation other)
         {
             EnsureSchemaMatches(rel, other);
             return new DerivedRelation(rel.Schema, rel.Except(other).Distinct());
+        }
+
+        public static Relation NotMatching(this Relation rel, Relation other) => SemiDifference(rel, other);
+
+        /// <summary>
+        /// Rows from <paramref name="rel"/> where no matching rows exist in <paramref name="other"/>
+        /// </summary>
+        public static Relation SemiDifference(this Relation rel, Relation other)
+        {
+            EnsureSchemaMatches(rel, other);
+            return new DerivedRelation(rel.Schema, rel.Except(rel.Matching(other)).Distinct());
         }
 
         public static Relation IntersectAll(this Relation rel, Relation other)
@@ -170,6 +184,10 @@ namespace BusterWood.Data
                 throw new ArgumentException($"Schemas '{rel.Schema}' and '{other.Schema}' do not have any common columns");
             return joinOn;
         }
+
+        /// <summary>Returns rows from <paramref name="rel"/> where a row EXISTS in <paramref name="other"/> with matching values in common columns</summary>
+        /// <remarks>select * from X where exists (select * from Y where X.colA = Y.colA and X.colB = Y.colB and ....)</remarks>
+        public static Relation Matching(this Relation rel, Relation other, Action<IEnumerable<Column>> joinObserver = null) => SemiJoin(rel, other, joinObserver);
 
         /// <summary>Returns rows from <paramref name="rel"/> where a row EXISTS in <paramref name="other"/> with matching values in common columns</summary>
         /// <remarks>select * from X where exists (select * from Y where X.colA = Y.colA and X.colB = Y.colB and ....)</remarks>

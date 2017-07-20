@@ -48,7 +48,7 @@ namespace BusterWood.Csv
             {
                 sb.Append(@"""").Append(col.Name).Append(@""": ");
                 if (col.Type == typeof(string))
-                    sb.Append(@"""{").Append(i).Append(@"}"", ");
+                    sb.Append(@"""{").Append(i).Append(@"}"", "); //TODO: escaping of special characters
                 else if (col.Type == typeof(DateTime) || col.Type == typeof(DateTimeOffset))
                     sb.Append(@"""{").Append(i).Append(@":u}"", ");
                 else
