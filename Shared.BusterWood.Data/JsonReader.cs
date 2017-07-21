@@ -217,4 +217,5 @@ namespace BusterWood.Json
         Null = 'n',
         Number,
     }
+
 }

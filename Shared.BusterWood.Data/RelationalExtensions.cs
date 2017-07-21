@@ -148,7 +148,7 @@ namespace BusterWood.Data
             joinObserver?.Invoke(joinOn);
             var joinSchema = new Schema("join", joinOn);
             var otherKeys = new HashSet<ProjectedTuple>(other.Select(row => new ProjectedTuple(joinSchema, row)));
-            var resultSchema = new Schema($"{rel.Schema} exists {other.Schema}", rel.Schema);
+            var resultSchema = new Schema($"{rel.Schema} matching {other.Schema}", rel.Schema);
             var rows = rel.Where(row => otherKeys.Contains(new ProjectedTuple(joinSchema, row)));
             return new DerivedRelation(resultSchema, rows.Distinct());
         }
@@ -163,6 +163,40 @@ namespace BusterWood.Data
         }
 
         public static MaterializedRelation Materialize(this Relation rel) => new MaterializedRelation(rel.Schema, rel);
+
+        /// <summary>
+        /// Extends <paramref name="rel"/> with an additional column containing the image relation of <paramref name="other"/>
+        /// </summary>
+        public static Relation Image(this Relation rel, Relation other, string columnName)
+        {
+            List<Column> cols = CommonColumns(rel, other);
+            var common = new Schema("join", cols);
+            var remaining = new Schema(other.Schema.Name, other.Schema.Where(c => !cols.Contains(c)));
+            var otherLookup = other.ToLookup(row => new ProjectedTuple(common, row), row => new ProjectedTuple(remaining, row));
+            var newcol = new Column(columnName, remaining);
+            var resultSchema = new Schema($"{rel} image {other}", rel.Schema.Concat(new[] { newcol }));
+            var rows = rel.Select(row => new ExtendedTuple(resultSchema, row, new ColumnValue(newcol, otherLookup[new ProjectedTuple(common, row)])));
+            return new DerivedRelation(resultSchema, rows);
+        }
+
+        public static decimal SumDecimal(this Relation rel, string columnName)
+        {
+            var col = rel.Schema[columnName];
+            if (col.Type == typeof(decimal))
+            {
+                return rel.Sum(row => row.Decimal(columnName));
+            }
+            else
+            {
+                return rel.Sum(row =>
+                {
+                    var val = row.Get(columnName);
+                    return val == null ? 0m : Convert.ToDecimal(val);
+                });
+            }
+        }
+        
+
     }
 
     internal class ExtendedTuple : Row

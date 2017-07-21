@@ -26,7 +26,7 @@ namespace BusterWood.Data
 
     /// <summary>The metadata for a <see cref="Relation"/> of <see cref="Row"/></summary>
     /// <remarks>This type is immuatable and cannot be changed (mutated)</remarks>
-    public struct Schema : IReadOnlyCollection<Column>, IEquatable<Schema>
+    public class Schema : IReadOnlyCollection<Column>, IEquatable<Schema>
     {
         readonly Column[] columns;
         readonly int hashCode;

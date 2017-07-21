@@ -8,22 +8,30 @@ namespace BusterWood.Data
     public struct Column : IEquatable<Column>
     {
         internal static readonly IEqualityComparer<string> NameEquality = StringComparer.OrdinalIgnoreCase;
-        static readonly Type[] allowedTypes = { typeof(String), typeof(int), typeof(long), typeof(bool), typeof(double), typeof(decimal), typeof(DateTimeOffset), typeof(Schema), typeof(short) };
+        static readonly Type[] allowedTypes = { typeof(String), typeof(int), typeof(long), typeof(bool), typeof(double), typeof(decimal), typeof(DateTimeOffset), typeof(short) };
 
-        public Column(string name, Type type)
+        public Column(string name, Schema schema) : this(name, (object)schema)
+        {
+        }
+
+        public Column(string name, Type type) : this(name, (object)type)
+        {
+        }
+
+        internal Column(string name, object type)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Type = type ?? throw new ArgumentNullException(nameof(type));
             if (!IsAllowed(type)) throw new ArgumentOutOfRangeException(nameof(type), type, $"Not allowed");
         }
 
-        public static bool IsAllowed(Type type) => Array.IndexOf(allowedTypes, type) >= 0;
+        public static bool IsAllowed(object type) => Array.IndexOf(allowedTypes, type) >= 0 || type is Schema;
 
         /// <summary>Name of this column</summary>
         public string Name { get; }
 
-        /// <summary>the <see cref="System.Type"/> of this column</summary>
-        public Type Type { get; }
+        /// <summary>the <see cref="System.Type"/> of this column or <see cref="Schema"/> for a nested relation</summary>
+        public object Type { get; }
 
         public bool NameEquals(string name) => NameEquality.Equals(Name, name);
         public bool Equals(Column other) => NameEquals(other.Name) && Type == other.Type;

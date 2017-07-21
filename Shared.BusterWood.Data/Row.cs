@@ -36,7 +36,13 @@ namespace BusterWood.Data
         public int Int(string name) => ValueOrDefault<int>(Get(name));
         public long Long(string name) => ValueOrDefault<long>(Get(name));
         public double Double(string name) => ValueOrDefault<double>(Get(name));
-        public decimal Decimal(string name) => ValueOrDefault<decimal>(Get(name));
+
+        public decimal Decimal(string name)
+        {
+            var val = Get(name);
+            return val == null ? 0m : (decimal)val;
+        }
+
         public bool Bool(string name) => ValueOrDefault<bool>(Get(name));
         public DateTime DateTime(string name) => ValueOrDefault<DateTime>(Get(name));
         public DateTimeOffset DateTimeOffset(string name) => ValueOrDefault<DateTimeOffset>(Get(name));
@@ -48,6 +54,7 @@ namespace BusterWood.Data
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public bool Equals(Row other) => Schema == other.Schema && this.All(l => other.Contains(l));
+
         public override bool Equals(object obj) => Equals(obj as Row);
 
         public override int GetHashCode()
