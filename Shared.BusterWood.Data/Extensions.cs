@@ -82,9 +82,14 @@ namespace BusterWood.Data
         /// <remarks>Duplicates are removed from the resulting sequence</remarks>
         public static Relation ProjectAway(this Relation rel, IEnumerable<string> columns)
         {
-            var set = new HashSet<string>(columns, Column.NameEquality);
-            var toRemove = rel.Schema.Where(c => set.Contains(c.Name));
+            var toRemove = NamesToColumns(rel, columns);
             return ProjectAway(rel, toRemove);
+        }
+
+        private static IEnumerable<Column> NamesToColumns(Relation rel, IEnumerable<string> columns)
+        {
+            var set = new HashSet<string>(columns, Column.NameEquality);
+            return rel.Schema.Where(c => set.Contains(c.Name));
         }
 
         public static Relation ProjectAway(this Relation rel, IEnumerable<Column> columns)
@@ -121,20 +126,17 @@ namespace BusterWood.Data
                 throw new ArgumentException($"Schemas '{rel.Schema}' and '{other.Schema}' are incompatible");
         }
 
-        /// <summary>
-        /// Rows from <paramref name="rel"/> that do not exist in <paramref name="other"/>
-        /// </summary>
+        /// <summary>Rows from <paramref name="rel"/> that do not exist in <paramref name="other"/></summary>
         public static Relation Difference(this Relation rel, Relation other)
         {
             EnsureSchemaMatches(rel, other);
             return new DerivedRelation(rel.Schema, rel.Except(other).Distinct());
         }
 
+        /// <summary>Rows from <paramref name="rel"/> where no matching rows exist in <paramref name="other"/>, where match is via a natural join</summary>
         public static Relation NotMatching(this Relation rel, Relation other) => SemiDifference(rel, other);
 
-        /// <summary>
-        /// Rows from <paramref name="rel"/> where no matching rows exist in <paramref name="other"/>
-        /// </summary>
+        /// <summary>Rows from <paramref name="rel"/> where no matching rows exist in <paramref name="other"/>, where match is via a natural join</summary>
         public static Relation SemiDifference(this Relation rel, Relation other)
         {
             EnsureSchemaMatches(rel, other);
