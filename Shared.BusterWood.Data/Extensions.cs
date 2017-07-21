@@ -175,7 +175,7 @@ namespace BusterWood.Data
             var joinSchema = new Schema("join", joinOn);
             var otherByKeys = other.ToLookup(row => new ProjectedTuple(joinSchema, row));
             var unionSchema = new Schema($"{rel} union {other}", rel.Schema.Union(other.Schema));
-            var rows = rel.SelectMany(left => otherByKeys[new ProjectedTuple(joinSchema, left)], (left, right) => new UnionedTuple(unionSchema, left, right));
+            var rows = rel.SelectMany(left => otherByKeys[new ProjectedTuple(joinSchema, left)], (left, right) => new JoinedTuple(unionSchema, left, right));
             return new DerivedRelation(unionSchema, rows.Distinct());
         }
 
@@ -263,12 +263,12 @@ namespace BusterWood.Data
             //TODO: override other methods?
         }
 
-        private class UnionedTuple : Row
+        private class JoinedTuple : Row
         {
             readonly Row left;
             readonly Row right;
 
-            public UnionedTuple(Schema schema, Row left, Row right) : base(schema)
+            public JoinedTuple(Schema schema, Row left, Row right) : base(schema)
             {
                 this.left = left;
                 this.right = right;
@@ -281,8 +281,8 @@ namespace BusterWood.Data
 
         private class RenamedTuple : Row
         {
-            private IDictionary<string, string> changes;
-            private Row inner;
+            readonly IDictionary<string, string> changes;
+            readonly Row inner;
 
             public RenamedTuple(Row r, IDictionary<string, string> changes) : base(r.Schema)
             {
