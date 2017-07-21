@@ -22,7 +22,7 @@ namespace BusterWood.Csv
 
                 input.CheckSchemaCompatibility(others);
 
-                var unionOp = all ? (Func<Relation, Relation, Relation>)Data.Extensions.UnionAll : Data.Extensions.Union;
+                var unionOp = all ? (Func<Relation, Relation, Relation>)AllExtensions.UnionAll : RelationalExtensions.Union;
                 return others.Aggregate(input, (acc, o) => unionOp(acc, o));
             }
             catch (Exception ex)

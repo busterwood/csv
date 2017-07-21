@@ -9,6 +9,7 @@
     <Import_RootNamespace>Shared.BusterWood.Data</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AllExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Column.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ClassExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CsvReaderExtensions.cs" />
@@ -16,6 +17,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)DataSequence.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DerivedRelation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RelationalExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)JsonReader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MaterializedRelation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Row.cs" />

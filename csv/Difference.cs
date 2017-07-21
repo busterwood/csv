@@ -23,7 +23,7 @@ namespace BusterWood.Csv
 
                 input.CheckSchemaCompatibility(others);
 
-                var unionOp = all ? (Func<Relation, Relation, Relation>)Data.Extensions.DifferenceAll : Data.Extensions.Difference;
+                var unionOp = all ? (Func<Relation, Relation, Relation>)AllExtensions.DifferenceAll : RelationalExtensions.Difference;
                 Relation result = reverse
                     ? others.Aggregate(input, (acc, o) => unionOp(o, acc)) // reverse diff
                     : others.Aggregate(input, (acc, o) => unionOp(acc, o));
