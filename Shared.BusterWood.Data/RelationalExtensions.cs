@@ -27,36 +27,36 @@ namespace BusterWood.Data
         /// <summary>Filter the source releation, e.g. a "Where" clause</summary>
         public static Relation RestrictAway(this Relation rel, Func<Row, bool> predicate) => new DerivedRelation(rel.Schema, Enumerable.Where(rel, row => !predicate(row)).Distinct());
 
-        /// <summary>Returns a new sequence with that only contains the requested <paramref name="columns"/> from the source <paramref name="rel"/></summary>
+        /// <summary>Returns a new sequence with that only contains the requested <paramref name="columnNames"/> from the source <paramref name="rel"/></summary>
         /// <remarks>Duplicates are removed from the resulting sequence</remarks>
-        public static Relation Project(this Relation rel, IEnumerable<string> columns)
+        public static Relation Project(this Relation rel, IEnumerable<string> columnNames)
         {
-            var cols = columns.Select(c => rel.Schema[c]);
+            var cols = columnNames.Select(c => rel.Schema[c]);
             var newSchema = new Schema("", cols);
             var newRows = rel.Select(r => new ProjectedTuple(newSchema, r));
             return new DerivedRelation(newSchema, newRows.Distinct());
         }
 
-        /// <summary>Returns a new sequence with that only contains the requested <paramref name="columns"/> from the source <paramref name="rel"/></summary>
+        /// <summary>Returns a new sequence with that only contains the requested <paramref name="columnNames"/> from the source <paramref name="rel"/></summary>
         /// <remarks>Duplicates are removed from the resulting sequence</remarks>
-        public static Relation Project(this Relation rel, params string[] columns) => Project(rel, (IEnumerable<string>)columns);
+        public static Relation Project(this Relation rel, params string[] columnNames) => Project(rel, (IEnumerable<string>)columnNames);
 
-        /// <summary>Returns a new sequence with <paramref name="columns"/> removed from the source <paramref name="rel"/></summary>
+        /// <summary>Returns a new sequence with <paramref name="columnNames"/> removed from the source <paramref name="rel"/></summary>
         /// <remarks>Duplicates are removed from the resulting sequence</remarks>
-        public static Relation ProjectAway(this Relation rel, params string[] columns) => ProjectAway(rel, (IEnumerable<string>)columns);
+        public static Relation ProjectAway(this Relation rel, params string[] columnNames) => ProjectAway(rel, (IEnumerable<string>)columnNames);
 
-        /// <summary>Returns a new sequence with <paramref name="columns"/> removed from the source <paramref name="rel"/></summary>
+        /// <summary>Returns a new sequence with <paramref name="columnNames"/> removed from the source <paramref name="rel"/></summary>
         /// <remarks>Duplicates are removed from the resulting sequence</remarks>
-        public static Relation ProjectAway(this Relation rel, IEnumerable<string> columns)
+        public static Relation ProjectAway(this Relation rel, IEnumerable<string> columnNames)
         {
-            var toRemove = NamesToColumns(rel, columns);
-            return ProjectAway(rel, toRemove);
+            var columns = ColumnsFromName(rel.Schema, columnNames);
+            return ProjectAway(rel, columns);
         }
 
-        private static IEnumerable<Column> NamesToColumns(Relation rel, IEnumerable<string> columns)
+        static IEnumerable<Column> ColumnsFromName(Schema schema, IEnumerable<string> columns)
         {
             var set = new HashSet<string>(columns, Column.NameEquality);
-            return rel.Schema.Where(c => set.Contains(c.Name));
+            return schema.Where(c => set.Contains(c.Name));
         }
 
         public static Relation ProjectAway(this Relation rel, IEnumerable<Column> columns)
