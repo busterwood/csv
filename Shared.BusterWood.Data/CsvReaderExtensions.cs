@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace BusterWood.Data
 {
@@ -23,7 +24,21 @@ namespace BusterWood.Data
     {
         public static string ToCsv(this Schema schema, char delimiter = ',') => string.Join(delimiter.ToString(), schema.Select(c => c.Name));
 
-        public static string ToCsv(this Row row, char delimiter = ',') => string.Join(delimiter.ToString(), row.Select(r => r.Value));
+        public static string ToCsv(this Row row, char delimiter = ',')
+        {
+            StringBuilder sb = new StringBuilder(80);
+            foreach (var cv in row)
+            {
+                var value = cv.Value.ToString();
+                if (value.IndexOf(delimiter) >= 0)
+                    sb.Append('"').Append(value).Append('"');
+                else
+                    sb.Append(value);
+                sb.Append(delimiter);
+            }
+            sb.Length -= 1; // remove last delimiter
+            return sb.ToString();
+        }
 
         public static Relation CsvToRelation(this TextReader reader, string relationName, char delimiter=',')
         {
@@ -47,6 +62,7 @@ namespace BusterWood.Data
             readonly TextReader reader;
             readonly char delimiter;
             readonly Column[] columns;
+            readonly StringBuilder buffer = new StringBuilder();
 
             public CsvRelation(TextReader reader, Column[] columns, string schemaName, char delimiter) : base(new Schema(schemaName, columns))
             {
@@ -59,25 +75,79 @@ namespace BusterWood.Data
             {
                 for(;;)
                 {
-                    var line = reader.ReadLine();
-                    if (string.IsNullOrEmpty(line))
-                        yield break;
-
-                    string[] values = ParseLine(line);
+                    string[] values = ParseLine();
+                    if (values == null)
+                        break;
                     yield return new OrderedArrayRow(Schema, columns, values);
                 }
             }
 
-            string[] ParseLine(string line)
+            string[] ParseLine()
             {
-                var values = line.Split(delimiter);
-                return values.Length == Schema.Count ? values : PadLine(values);
+                var values = new string[columns.Length];
+                int vi = 0;
+                for (;;)
+                {
+                    int next = reader.Read();
+                    if (next == -1) // end of file
+                    {
+                        if (vi == 0 && buffer.Length == 0) // end of file on empty line
+                            return null;
+
+                        // end of file at end of line of values
+                        values[vi] = buffer.ToString();
+                        buffer.Clear();
+                        vi++;
+                        break;
+                    }
+
+                    char ch = (char)next;
+                    if (ch == ',') // end of value
+                    {                        
+                        values[vi] = buffer.ToString();
+                        buffer.Clear();
+                        vi++;
+                    }
+                    else if (ch == '\r') // carrage return
+                    {
+                        // skip
+                    }
+                    else if (ch == '\n')  // end of line
+                    {
+                        
+                        values[vi] = buffer.ToString();
+                        buffer.Clear();
+                        vi++;
+                        break;
+                    }
+                    else if (ch == '"') // read quoted value
+                    {                        
+                        for(;;)
+                        {
+                            next = reader.Read();
+                            if (next == -1) // end of file
+                                throw new FormatException("Unexpected end of quoted value");
+
+                            ch = (char)next;
+                            if (ch == '"')  // end of quoted value
+                                break; 
+                            else // normal char inside quotes
+                                buffer.Append(ch);
+                        }
+                    }
+                    else // a normal char
+                    {
+                        buffer.Append(ch);
+                    }
+                }
+
+                for (; vi < values.Length; vi++)
+                {
+                    values[vi] = "";
+                }
+                return values;
             }
 
-            private string[] PadLine(string[] values)
-            {
-                return values.Concat(Enumerable.Repeat("", Schema.Count - values.Length)).ToArray(); // some missing data, report this via event?
-            }
         }
 
     }
