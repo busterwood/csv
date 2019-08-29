@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>netcoreapp1.0;net462</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.0;net462</TargetFrameworks>
     <PackageId>BusterWood.CSV</PackageId>
     <PackageVersion>1.0.0</PackageVersion>
     <Authors>BusterWood</Authors>
@@ -12,7 +12,7 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'net462'">
     <RuntimeIdentifier>win7-x64</RuntimeIdentifier>
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
     <PackageReference Include="System.Data.Common" Version="4.1.0" />
     <PackageReference Include="System.Reflection" Version="4.1.0" />
   </ItemGroup>

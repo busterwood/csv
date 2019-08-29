@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace BusterWood.Data
 {
     /// <summary>A relational tuple with a fixed <see cref="Schema"/>, but called Row to avoid conflict with System.Tuple</summary>
-    /// <remarks>This type is immuatable and cannot be changed (mutated)</remarks>
+    /// <remarks>This type is immutable and cannot be changed (mutated)</remarks>
     public abstract class Row : IReadOnlyCollection<ColumnValue>, ISchemaed, IEquatable<Row>
     {
         public Schema Schema { get; }
@@ -64,7 +64,7 @@ namespace BusterWood.Data
             // as it avoid calculating hash codes for each Column
             unchecked
             {
-                var hc = Schema.GetHashCode(); // get the cached shashcode from the schema, 
+                var hc = Schema.GetHashCode(); // get the cached hash code from the schema, 
                 foreach (var col in Schema)
                     hc += Get(col.Name)?.GetHashCode() ?? 0; // add on all the values
                 return hc;
@@ -76,7 +76,7 @@ namespace BusterWood.Data
     }
 
     /// <summary>A row of data with a defined <see cref="Schema"/></summary>
-    /// <remarks>This type is immuatable and cannot be changed (mutated)</remarks>
+    /// <remarks>This type is immutable and cannot be changed (mutated)</remarks>
     public class ArrayRow : Row
     {
         readonly ColumnValue[] values;
@@ -108,7 +108,7 @@ namespace BusterWood.Data
     }
 
     /// <summary>A row of data with a defined <see cref="Schema"/></summary>
-    /// <remarks>This type is immuatable and cannot be changed (mutated)</remarks>
+    /// <remarks>This type is immutable and cannot be changed (mutated)</remarks>
     public class OrderedArrayRow : Row
     {
         readonly Column[] columns;

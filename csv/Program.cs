@@ -24,6 +24,7 @@ namespace BusterWood.Csv
             "toxml",
             "where",
             "union",
+            "page",
         };
 
         static void Main(string[] argv)
@@ -92,6 +93,8 @@ namespace BusterWood.Csv
                     return ToXml.Run(args, input);
                 case "union":
                     return Union.Run(args, input);
+                case "page":
+                    return Page.Run(args, input);
                 default:
                     throw new Exception("Unknown command");
             }
@@ -112,6 +115,7 @@ namespace BusterWood.Csv
             Console.Error.WriteLine($"\tunion           set union between the input and other file(s)");
             Console.Error.WriteLine($"Non-relational commands are:");
             Console.Error.WriteLine($"\torderby         sorts the input by one or more columns");
+            Console.Error.WriteLine($"\tpage            gets a page of data");
             Console.Error.WriteLine($"\tpretty          formats the input CSV in aligned columns");
             Console.Error.WriteLine($"\ttojson          outputs JSON array for the input CSV, one object per row");
             Console.Error.WriteLine($"\ttoxml           outputs XML for the input CSV, one element per row");

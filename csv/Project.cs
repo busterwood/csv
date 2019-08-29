@@ -39,7 +39,7 @@ namespace BusterWood.Csv
         static void Help()
         {
             Console.Error.WriteLine($"csv project [--all] [--in file] [--away] Column [Column ...]");
-            Console.Error.WriteLine($"Outputs in the input CSV with only the specified columns");
+            Console.Error.WriteLine($"Outputs the input CSV with only the specified columns");
             Console.Error.WriteLine($"\t--all   do NOT remove duplicates from the result");
             Console.Error.WriteLine($"\t--in    read the input from a file path (rather than standard input)");
             Console.Error.WriteLine($"\t--away  removes the input columns from the source");

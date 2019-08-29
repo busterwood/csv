@@ -2,7 +2,7 @@
   "profiles": {
     "csv": {
       "commandName": "Project",
-      "commandLineArgs": "--in sample1.csv toxml"
+      "commandLineArgs": "--in C:\\dev\\csv\\csv\\csv\\Sample2.csv page --top 3"
     }
   }
 }

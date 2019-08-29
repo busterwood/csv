@@ -5,7 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Data.Common" Version="4.1.0" />
-    <PackageReference Include="System.Reflection" Version="4.1.0" />
+    <PackageReference Include="System.Reflection" Version="4.3.0" />
   </ItemGroup>
   <Import Project="..\Shared.BusterWood.Data\Shared.BusterWood.Data.projitems" Label="Shared" />
 </Project>

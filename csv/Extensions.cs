@@ -31,6 +31,13 @@ namespace BusterWood.Data
             return val;
         }
 
+        public static int? IntFlag(this List<string> args, string flag)
+        {
+            var str = args.StringFlag(flag);
+            return int.TryParse(str, out int val) ? val : (int?)null;
+        }
+
+
         public static string Join(this IEnumerable items, string separator = ",") => string.Join(separator, items.Cast<object>());
 
         public static void CheckSchemaCompatibility(this Relation input, IEnumerable<Relation> others)

@@ -14,7 +14,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ClassExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CsvReaderExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataReaderExtensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)DataSequence.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Relation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DerivedRelation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)JsonWriter.cs" />

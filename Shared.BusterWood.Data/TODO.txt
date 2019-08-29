@@ -3,7 +3,7 @@
 
 * Read 2D JSON data
 * Read 2D XML data
-* N-demensional relations
+* N-dimensional relations
 * Read N-dimensional JSON
 * Read N-dimensional XML
 * Row to object via CTOR
