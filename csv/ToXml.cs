@@ -45,7 +45,7 @@ namespace BusterWood.Csv
             foreach (var col in schema)
             {
                 sb.Append(col.Name).Append(@"=""");
-                if (col.Type == typeof(DateTime) || col.Type == typeof(DateTimeOffset))
+                if (Equals(col.Type, typeof(DateTime)) || Equals(col.Type, typeof(DateTimeOffset)))
                     sb.Append("{").Append(i).Append(@":u}");
                 else
                     sb.Append("{").Append(i).Append(@"}");

@@ -130,7 +130,7 @@ namespace BusterWood.Data
 
         private static List<Column> CommonColumns(Relation rel, Relation other)
         {
-            var joinOn = rel.Schema.Intersect(other.Schema).ToList();
+            var joinOn = rel.Schema.Intersect(other.Schema, EqualityComparer<Column>.Default).ToList();
             if (joinOn.Count == 0)
                 throw new ArgumentException($"Schemas '{rel.Schema}' and '{other.Schema}' do not have any common columns");
             return joinOn;
@@ -182,7 +182,7 @@ namespace BusterWood.Data
         public static decimal SumDecimal(this Relation rel, string columnName)
         {
             var col = rel.Schema[columnName];
-            if (col.Type == typeof(decimal))
+            if (Equals(col.Type, typeof(decimal)))
             {
                 return rel.Sum(row => row.Decimal(columnName));
             }

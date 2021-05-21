@@ -17,7 +17,7 @@ namespace UnitTests
         public void can_write_array_over_multiple_lines()
         {
             var expected = @"[ 
- { ""First"": 1 }
+ { ""Text"" : ""hello"" }
 ]";
 
             var sb = new StringBuilder();

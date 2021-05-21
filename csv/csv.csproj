@@ -1,20 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\BusterWood.Data\BusterWood.Data.csproj" />
+  </ItemGroup>
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>netcoreapp2.0;net462</TargetFrameworks>
+    <TargetFrameworks>net5.0</TargetFrameworks>
     <PackageId>BusterWood.CSV</PackageId>
-    <PackageVersion>1.0.0</PackageVersion>
+    <PackageVersion>2.0.0</PackageVersion>
     <Authors>BusterWood</Authors>
     <ProjectUrl>https://github.com/busterwood/Data</ProjectUrl>
     <IsTool>true</IsTool>
     <Description>Relational algebra on CSV files</Description>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net462'">
-    <RuntimeIdentifier>win7-x64</RuntimeIdentifier>
-  </PropertyGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
-    <PackageReference Include="System.Data.Common" Version="4.1.0" />
-    <PackageReference Include="System.Reflection" Version="4.1.0" />
-  </ItemGroup>
-  <Import Project="..\Shared.BusterWood.Data\Shared.BusterWood.Data.projitems" Label="Shared" />
 </Project>
