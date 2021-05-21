@@ -4,7 +4,7 @@
   </ItemGroup>
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net5.0</TargetFrameworks>
+    <TargetFramework>net5.0</TargetFramework>
     <PackageId>BusterWood.CSV</PackageId>
     <PackageVersion>2.0.0</PackageVersion>
     <Authors>BusterWood</Authors>
