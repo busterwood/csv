@@ -38,7 +38,11 @@ namespace BusterWood.Data
         public Schema(string name, params Column[] columns)
         {
             Name = name;
-            this.columns = columns ?? throw new ArgumentNullException(nameof(columns));
+            if (columns == null)
+                throw new ArgumentNullException(nameof(columns));
+            if (columns.Length == 0)
+                throw new ArgumentException("schema cannot have zero columns", nameof(columns));
+            this.columns = columns;
             CheckForDuplicateColumns(columns);
             hashCode = columns.Aggregate(0, (hc, c) => { unchecked { return hc + c.GetHashCode(); } });
         }

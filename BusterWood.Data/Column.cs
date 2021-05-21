@@ -7,7 +7,7 @@ namespace BusterWood.Data
     /// <remarks>This type is immutable and cannot be changed (mutated)</remarks>
     public struct Column : IEquatable<Column>
     {
-        internal static readonly IEqualityComparer<string> NameEquality = StringComparer.OrdinalIgnoreCase;
+        public static readonly StringComparer NameEquality = StringComparer.OrdinalIgnoreCase;
         static readonly Type[] allowedTypes = { typeof(String), typeof(int), typeof(long), typeof(bool), typeof(double), typeof(decimal), typeof(DateTimeOffset), typeof(short) };
 
         public Column(string name, Schema schema) : this(name, (object)schema)

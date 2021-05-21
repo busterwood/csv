@@ -253,3 +253,5 @@ paket-files/
 
 *.v3.ncrunchproject
 *.v3.ncrunchsolution
+
+.vscode/
